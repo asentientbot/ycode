@@ -1,10 +1,24 @@
 @import AppKit;
-#import "AppDelegate.h"
+@import Darwin;
+@import ObjectiveC;
+@import MachO;
+#define trace NSLog
 
-int main(int argCount,char* argList[])
+// TODO: lol
+
+#import "Utils.m"
+#import "Setup.m"
+#import "AmyDocument.h"
+#import "AmyWindowController.h"
+#import "AmyDelegate.h"
+#import "AmyDocument.m"
+#import "AmyWindowController.m"
+#import "AmyDelegate.m"
+
+int main(int argc,char** argv)
 {
-	NSApplication.sharedApplication.delegate=AppDelegate.alloc.init;
-	NSApp.run;
+	startup(argc,argv);
 	
-	return 0;
+	NSApplication.sharedApplication.delegate=AmyDelegate.alloc.init;
+	NSApp.run;
 }

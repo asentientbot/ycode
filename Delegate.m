@@ -1,3 +1,9 @@
+enum
+{
+	TagSetting=1,
+	TagTheme=2
+};
+
 @implementation Delegate
 
 -(NSMenu*)addMenuTitle:(NSString*)title to:(NSMenu*)bar
@@ -9,11 +15,12 @@
 	return menu;
 }
 
--(void)addItemTitle:(NSString*)title action:(NSString*)action key:(NSString*)key mask:(NSEventModifierFlags)mask to:(NSMenu*)menu
+-(NSMenuItem*)addItemTitle:(NSString*)title action:(NSString*)action key:(NSString*)key mask:(NSEventModifierFlags)mask to:(NSMenu*)menu
 {
 	NSMenuItem* item=[NSMenuItem.alloc initWithTitle:title action:NSSelectorFromString(action) keyEquivalent:key].autorelease;
 	item.keyEquivalentModifierMask=NSEventModifierFlagCommand|mask;
 	[menu addItem:item];
+	return item;
 }
 
 -(void)addSeparatorTo:(NSMenu*)menu
@@ -35,9 +42,9 @@
 	NSMenu* titleMenu=[self addMenuTitle:getAppName() to:bar];
 	[self addItemTitle:[@"About " stringByAppendingString:getAppName()] action:@"amyAbout:" key:@"" mask:0 to:titleMenu];
 	[self addSeparatorTo:titleMenu];
-	for(NSString* name in Settings.allNames)
+	for(NSString* name in Settings.allMappingNames)
 	{
-		[self addItemTitle:name action:@"amySettingsToggle:" key:@"" mask:0 to:titleMenu];
+		[self addItemTitle:name action:@"amySettingsToggle:" key:@"" mask:0 to:titleMenu].tag=TagSetting;
 	}
 	[self addSeparatorTo:titleMenu];
 	[self addItemTitle:@"Reset Settings (Needs Reload)" action:@"amySettingsReset:" key:@"" mask:0 to:titleMenu];
@@ -70,6 +77,11 @@
 	[self addItemTitle:@"Find Previous" action:@"findPrevious:" key:@"G" mask:0 to:editMenu];
 	
 	NSMenu* viewMenu=[self addMenuTitle:@"View" to:bar];
+	for(NSString* name in Settings.allThemeNames)
+	{
+		[self addItemTitle:name action:@"amySetTheme:" key:@"" mask:0 to:viewMenu].tag=TagTheme;
+	}
+	[self addSeparatorTo:viewMenu];
 	[self addItemTitle:@"Enter Full Screen" action:@"toggleFullScreen:" key:@"f" mask:NSEventModifierFlagControl to:viewMenu];
 	
 	NSMenu* windowMenu=[self addMenuTitle:@"Window" to:bar];
@@ -120,10 +132,16 @@
 	{
 		NSMenuItem* menuItem=(NSMenuItem*)item;
 		
-		SettingsMapping* mapping=[Settings mappingWithName:menuItem.title];
-		if(mapping)
+		switch(menuItem.tag)
 		{
-			menuItem.state=mapping.getValue?NSControlStateValueOn:NSControlStateValueOff;
+			case TagSetting:
+				;
+				SettingsMapping* mapping=[Settings mappingWithName:menuItem.title];
+				menuItem.state=mapping.getValue?NSControlStateValueOn:NSControlStateValueOff;
+				break;
+			case TagTheme:
+				menuItem.state=[menuItem.title isEqual:Settings.currentThemeName]?NSControlStateValueOn:NSControlStateValueOff;
+				break;
 		}
 	}
 	
@@ -139,6 +157,11 @@
 -(void)amySettingsReset:(NSMenuItem*)sender
 {
 	Settings.reset;
+}
+
+-(void)amySetTheme:(NSMenuItem*)sender
+{
+	[Settings setCurrentThemeName:sender.title];
 }
 
 @end

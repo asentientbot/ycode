@@ -2,6 +2,7 @@ void (*SoftInitialize)(int,NSError**);
 Class SoftDocument;
 Class SoftViewController;
 Class SoftTheme;
+Class SoftTheme2;
 Class SoftSettings;
 Class SoftSettings2;
 Class SoftDocumentLocation;
@@ -31,6 +32,23 @@ Class SoftDocumentLocation;
 @interface XcodeSettings:NSObject
 
 +(instancetype)sharedPreferences;
+
+@end
+
+@class XcodeThemeManager;
+
+@interface XcodeTheme2:NSObject
+
++(XcodeThemeManager*)preferenceSetsManager;
+-(NSString*)localizedName;
+
+@end
+
+@interface XcodeThemeManager:NSObject
+
+@property(retain) XcodeTheme2* currentPreferenceSet;
+
+-(NSArray<XcodeTheme2*>*)availablePreferenceSets;
 
 @end
 
@@ -77,6 +95,11 @@ XcodeSettings* getXcodeSettings()
 	return [SoftSettings sharedPreferences];
 }
 
+XcodeThemeManager* getXcodeThemeManager()
+{
+	return [SoftTheme2 preferenceSetsManager];
+}
+
 id returnNil()
 {
 	return nil;
@@ -93,10 +116,11 @@ void linkXcode()
 	SoftDocument=NSClassFromString(@"_TtC15IDESourceEditor18SourceCodeDocument");
 	SoftViewController=NSClassFromString(@"_TtC15IDESourceEditor16SourceCodeEditor");
 	SoftTheme=NSClassFromString(@"DVTTheme");
+	SoftTheme2=NSClassFromString(@"DVTFontAndColorTheme");
 	SoftSettings=NSClassFromString(@"DVTTextPreferences");
 	SoftSettings2=NSClassFromString(@"IDEFileTextSettings");
 	SoftDocumentLocation=NSClassFromString(@"DVTTextDocumentLocation");
-	if(!(SoftInitialize&&SoftDocument&&SoftViewController&&SoftTheme&&SoftSettings&&SoftSettings2&&SoftDocumentLocation))
+	if(!(SoftInitialize&&SoftDocument&&SoftViewController&&SoftTheme&&SoftTheme2&&SoftSettings&&SoftSettings2&&SoftDocumentLocation))
 	{
 		alertAbort(@"symbol missing");
 	}
@@ -111,6 +135,8 @@ void linkXcode()
 	{
 		alertAbort(@"xcode init failed");
 	}
+	
+	// TODO: does SoftTheme2 work for this? (test Chloe)
 	
 	[SoftTheme initialize];
 }

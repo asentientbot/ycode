@@ -29,7 +29,7 @@
 	];
 }
 
-+(NSArray<NSString*>*)allNames
++(NSArray<NSString*>*)allMappingNames
 {
 	return [Settings.allMappings valueForKey:@"name"];
 }
@@ -45,6 +45,34 @@
 	}
 	
 	return nil;
+}
+
++(NSArray<XcodeTheme2*>*)allThemes
+{
+	return getXcodeThemeManager().availablePreferenceSets;
+}
+
++(NSArray<NSString*>*)allThemeNames
+{
+	NSArray<NSString*>* names=[Settings.allThemes valueForKeyPath:@"localizedName"];
+	return [names sortedArrayUsingSelector:@selector(compare:)];
+}
+
++(NSString*)currentThemeName
+{
+	return getXcodeThemeManager().currentPreferenceSet.localizedName;
+}
+
++(void)setCurrentThemeName:(NSString*)name
+{
+	for(XcodeTheme2* theme in Settings.allThemes)
+	{
+		if([theme.localizedName isEqual:name])
+		{
+			getXcodeThemeManager().currentPreferenceSet=theme;
+			break;
+		}
+	}
 }
 
 +(void)reset

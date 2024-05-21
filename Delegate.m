@@ -1,4 +1,4 @@
-@implementation AmyDelegate
+@implementation Delegate
 
 -(NSMenu*)addMenuTitle:(NSString*)title to:(NSMenu*)bar
 {
@@ -23,9 +23,25 @@
 
 -(void)applicationWillFinishLaunching:(NSNotification*)note
 {
+	BOOL firstRun=![NSUserDefaults.standardUserDefaults boolForKey:@"launched"];
+	[NSUserDefaults.standardUserDefaults setBool:true forKey:@"launched"];
+	if(firstRun)
+	{
+		Settings.reset;
+	}
+	
 	NSMenu* bar=NSMenu.alloc.init.autorelease;
 	
-	NSMenu* titleMenu=[self addMenuTitle:@"" to:bar];
+	NSMenu* titleMenu=[self addMenuTitle:getAppName() to:bar];
+	[self addItemTitle:[@"About " stringByAppendingString:getAppName()] action:@"amyAbout:" key:@"" mask:0 to:titleMenu];
+	[self addSeparatorTo:titleMenu];
+	for(NSString* name in Settings.allNames)
+	{
+		[self addItemTitle:name action:@"amySettingsToggle:" key:@"" mask:0 to:titleMenu];
+	}
+	[self addSeparatorTo:titleMenu];
+	[self addItemTitle:@"Reset Settings (Needs Reload)" action:@"amySettingsReset:" key:@"" mask:0 to:titleMenu];
+	[self addSeparatorTo:titleMenu];
 	[self addItemTitle:@"Quit" action:@"terminate:" key:@"q" mask:0 to:titleMenu];
 	
 	NSMenu* fileMenu=[self addMenuTitle:@"File" to:bar];
@@ -87,13 +103,42 @@
 	int value=sender.keyEquivalent.intValue;
 	if(value==9)
 	{
-		value=windows.count-1;
+		value=INT_MAX;
 	}
-	else
-	{
-		value=MIN(value,windows.count)-1;
-	}
+	value=MIN(value,windows.count)-1;
 	[windows[value] makeKeyAndOrderFront:nil];
+}
+
+-(void)amyAbout:(NSMenuItem*)sender
+{
+	alert([NSString stringWithFormat:@"Amy's meme text editor\n(built %s)\n\nPlease don't use this for real work...",__DATE__]);
+}
+
+-(BOOL)validateUserInterfaceItem:(NSObject<NSValidatedUserInterfaceItem>*)item
+{
+	if([item isKindOfClass:NSMenuItem.class])
+	{
+		NSMenuItem* menuItem=(NSMenuItem*)item;
+		
+		SettingsMapping* mapping=[Settings mappingWithName:menuItem.title];
+		if(mapping)
+		{
+			menuItem.state=mapping.getValue?NSControlStateValueOn:NSControlStateValueOff;
+		}
+	}
+	
+	return [self respondsToSelector:item.action];
+}
+
+-(void)amySettingsToggle:(NSMenuItem*)sender
+{
+	SettingsMapping* mapping=[Settings mappingWithName:sender.title];
+	[mapping setValue:sender.state!=NSControlStateValueOn];
+}
+
+-(void)amySettingsReset:(NSMenuItem*)sender
+{
+	Settings.reset;
 }
 
 @end

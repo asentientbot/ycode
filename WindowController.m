@@ -1,20 +1,6 @@
-// TODO: uhh
+@implementation WindowController
 
-@interface AmyExtension:NSObject
-@end
-
-@implementation AmyExtension
-
--(NSString*)identifier
-{
-	return @"";
-}
-
-@end
-
-@implementation AmyWindowController
-
--(instancetype)initWithDocument:(AmyDocument*)document
+-(instancetype)initWithDocument:(Document*)document
 {
 	self=super.init;
 	
@@ -27,11 +13,10 @@
 	
 	// TODO: what
 	
-	self.window.frameAutosaveName=@"amy";
-	[self.window setFrameUsingName:@"amy"];
+	self.window.frameAutosaveName=getAppName();
+	[self.window setFrameUsingName:getAppName()];
 	
-	self.xcodeViewController=[(XcodeViewController*)SoftViewController.alloc initWithNibName:nil bundle:nil document:document.xcodeDocument].autorelease;
-	self.xcodeViewController.representedExtension=AmyExtension.alloc.init.autorelease;
+	self.xcodeViewController=getXcodeViewController(document.xcodeDocument);
 	self.window.contentView=self.xcodeViewController.view;
 	
 	return self;

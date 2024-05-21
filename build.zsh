@@ -1,20 +1,21 @@
 set -e
 cd "$(dirname "$0")"
 
-name='Ycode 2'
+name=Ycode
 id=website.amys.ycode2
-class=AmyDocument
+class=Document
 type=public.text
+minVersion=12
 
 rm -rf "$name.app"
 mkdir -p "$name.app/Contents/MacOS"
 mkdir -p "$name.app/Contents/Resources"
 
-clang -fmodules -Wno-unused-getter-return-value -Wno-objc-missing-super-calls -mmacosx-version-min=14 main.m -o "$name.app/Contents/MacOS/$name"
+clang -fmodules -Wno-unused-getter-return-value -Wno-objc-missing-super-calls -mmacosx-version-min=$minVersion main.m -o "$name.app/Contents/MacOS/$name"
 
-rm -rf icon.png icon.iconset
 clang -fmodules -Wno-deprecated-declarations icon.m -o icon
 ./icon
+rm -rf icon.iconset
 mkdir icon.iconset
 for size in 16 32 128 256 512
 do

@@ -1,11 +1,8 @@
-@implementation AmyDocument
+@implementation Document
 
 -(void)makeWindowControllers
 {
-	// TODO: questionable
-	
-	NSString* tempName=[NSString stringWithFormat:@"ycode.%ld.txt",(long)(NSDate.date.timeIntervalSince1970*NSEC_PER_SEC)];
-	NSURL* tempURL=[NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:tempName]];
+	NSURL* tempURL=getTempURL();
 	if(self.fileURL)
 	{
 		if(![NSFileManager.defaultManager copyItemAtURL:self.fileURL toURL:tempURL error:nil])
@@ -21,11 +18,10 @@
 		}
 	}
 	
-	self.xcodeDocument=[(XcodeDocument*)SoftDocument.alloc initWithContentsOfURL:tempURL ofType:self.fileType error:nil].autorelease;
-	
+	self.xcodeDocument=getXcodeDocument(tempURL,self.fileType);
 	self.undoManager=self.xcodeDocument.undoManager;
 	
-	AmyWindowController* controller=[AmyWindowController.alloc initWithDocument:self].autorelease;
+	WindowController* controller=[WindowController.alloc initWithDocument:self].autorelease;
 	[self addWindowController:controller];
 }
 

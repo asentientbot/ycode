@@ -1,4 +1,4 @@
-@interface AmyDocument:NSDocument
+@interface Document:NSDocument
 
 @property(retain) XcodeDocument* xcodeDocument;
 

@@ -7,18 +7,25 @@
 // TODO: lol
 
 #import "Utils.m"
-#import "Setup.m"
-#import "AmyDocument.h"
-#import "AmyWindowController.h"
-#import "AmyDelegate.h"
-#import "AmyDocument.m"
-#import "AmyWindowController.m"
-#import "AmyDelegate.m"
+#import "Xcode.m"
+
+#import "SettingsMapping.h"
+#import "Settings.h"
+#import "Document.h"
+#import "WindowController.h"
+#import "Delegate.h"
+
+#import "SettingsMapping.m"
+#import "Settings.m"
+#import "Document.m"
+#import "WindowController.m"
+#import "Delegate.m"
 
 int main(int argc,char** argv)
 {
-	startup(argc,argv);
+	restartIfNeeded(argv);
+	linkXcode();
 	
-	NSApplication.sharedApplication.delegate=AmyDelegate.alloc.init;
+	NSApplication.sharedApplication.delegate=Delegate.alloc.init;
 	NSApp.run;
 }

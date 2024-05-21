@@ -8,6 +8,8 @@ int main(int argc,char** argv)
 	CGColorSpaceRef space=CGColorSpaceCreateDeviceRGB();
 	CGContextRef context=CGBitmapContextCreate(NULL,1024,1024,8,1024*4,space,kCGImageAlphaPremultipliedFirst);
 	
+	// TODO: don't rely on this image...
+	
 	CGImageRef base=[[NSImage imageNamed:@"NSIconGenericApplication"] CGImageForProposedRect:&rect context:nil hints:nil];
 	CGContextDrawImage(context,rect,base);
 	

@@ -136,8 +136,6 @@ void linkXcode()
 		alertAbort(@"xcode init failed");
 	}
 	
-	// TODO: does SoftTheme2 work for this? (test Chloe)
-	
 	[SoftTheme initialize];
 }
 
@@ -151,6 +149,7 @@ void restartIfNeeded(char** argv)
 		// TODO: configurable Xcode location?
 		
 		setenv("DYLD_FRAMEWORK_PATH","/Applications/Xcode.app/Contents/Frameworks:/Applications/Xcode.app/Contents/SharedFrameworks:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks:/Applications/Xcode.app/Contents/Developer/Library/Frameworks",true);
+		setenv("DYLD_LIBRARY_PATH","/Applications/Xcode.app/Contents/Frameworks",true);
 		execv(argv[0],argv);
 		
 		alertAbort(@"re-exec failed");

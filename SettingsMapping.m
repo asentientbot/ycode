@@ -23,12 +23,21 @@
 
 -(BOOL)getValue
 {
-	return (BOOL)(long)[getXcodeSettings() performSelector:self.getter];
+	// TODO: hide menu item if unsupported (e.g. minimap on Zoe)
+	
+	if([getXcodeSettings() respondsToSelector:self.getter])
+	{
+		return (BOOL)(long)[getXcodeSettings() performSelector:self.getter];
+	}
+	return false;
 }
 
 -(void)setValue:(BOOL)value
 {
-	[getXcodeSettings() performSelector:self.setter withObject:(id)(long)value];
+	if([getXcodeSettings() respondsToSelector:self.setter])
+	{
+		[getXcodeSettings() performSelector:self.setter withObject:(id)(long)value];
+	}
 }
 
 -(void)reset

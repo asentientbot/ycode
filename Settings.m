@@ -7,10 +7,10 @@
 	return @[
 		[SettingsMapping mappingWithName:@"Show Line Numbers" getter:@"showLineNumbers" defaultValue:true],
 		[SettingsMapping mappingWithName:@"Show Folding Sidebar" getter:@"showCodeFoldingSidebar" defaultValue:false],
-		[SettingsMapping mappingWithName:@"Show Minimap (Needs Reload)" getter:@"showMinimap" defaultValue:true],
+		[SettingsMapping mappingWithName:@"Show Minimap (May Need Reload)" getter:@"showMinimap" defaultValue:true],
 		[SettingsMapping mappingWithName:@"Show Page Guide" getter:@"showPageGuide" defaultValue:false],
 		[SettingsMapping mappingWithName:@"Show Structure Headers" getter:@"showStructureHeaders" defaultValue:true],
-		[SettingsMapping mappingWithName:@"Show Invisible Characters (Needs Reload)" getter:@"showInvisibleCharacters" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Show Invisible Characters (May Need Reload)" getter:@"showInvisibleCharacters" defaultValue:false],
 		[SettingsMapping mappingWithName:@"Indent Using Tabs" getter:@"useTabsToIndent" defaultValue:true],
 		[SettingsMapping mappingWithName:@"Use Syntax-Aware Indentation" getter:@"useSyntaxAwareIndenting" defaultValue:false],
 		[SettingsMapping mappingWithName:@"Close Block Comments" getter:@"autoCloseBlockComment" defaultValue:false],
@@ -81,6 +81,8 @@
 	{
 		mapping.reset;
 	}
+	
+	[Settings setCurrentThemeName:@"Default (Light)"];
 }
 
 @end

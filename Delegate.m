@@ -47,7 +47,7 @@ enum
 		[self addItemTitle:name action:@"amySettingsToggle:" key:@"" mask:0 to:titleMenu].tag=TagSetting;
 	}
 	[self addSeparatorTo:titleMenu];
-	[self addItemTitle:@"Reset Settings (Needs Reload)" action:@"amySettingsReset:" key:@"" mask:0 to:titleMenu];
+	[self addItemTitle:@"Reset Settings (May Need Reload)" action:@"amySettingsReset:" key:@"" mask:0 to:titleMenu];
 	[self addSeparatorTo:titleMenu];
 	[self addItemTitle:@"Quit" action:@"terminate:" key:@"q" mask:0 to:titleMenu];
 	
@@ -123,7 +123,13 @@ enum
 
 -(void)amyAbout:(NSMenuItem*)sender
 {
-	alert([NSString stringWithFormat:@"Amy's meme text editor\n\n%s\n\nPlease don't use this for real work...",stringify(gitHash)]);
+	NSString* gitInfo=[NSString stringWithUTF8String:stringify(gitHash)];
+	if(gitInfo.length==0)
+	{
+		gitInfo=@"[unknown Git commit]";
+	}
+	
+	alert([NSString stringWithFormat:@"Amy's meme text editor\n\n%@\n\nPlease don't use this for real work...",gitInfo]);
 }
 
 -(BOOL)validateUserInterfaceItem:(NSObject<NSValidatedUserInterfaceItem>*)item

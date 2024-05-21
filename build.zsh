@@ -5,7 +5,7 @@ name=Ycode
 id=website.amys.ycode2
 class=Document
 type=public.text
-minVersion=12
+minVersion=10.13
 
 rm -rf "$name.app" "$name.zip"
 mkdir -p "$name.app/Contents/MacOS"

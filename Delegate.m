@@ -37,6 +37,17 @@ enum
 		Settings.reset;
 	}
 	
+	contextMenuHook=[^()
+	{
+		NSMenu* menu=NSMenu.alloc.init.autorelease;
+		
+		[self addItemTitle:@"Cut" action:@"cut:" key:@"" mask:0 to:menu];
+		[self addItemTitle:@"Copy" action:@"copy:" key:@"" mask:0 to:menu];
+		[self addItemTitle:@"Paste" action:@"paste:" key:@"" mask:0 to:menu];
+		
+		return menu;
+	} copy];
+	
 	NSMenu* bar=NSMenu.alloc.init.autorelease;
 	
 	NSMenu* titleMenu=[self addMenuTitle:getAppName() to:bar];
@@ -129,7 +140,7 @@ enum
 		gitInfo=@"[unknown Git commit]";
 	}
 	
-	alert([NSString stringWithFormat:@"Amy's meme text editor\n\n%@\n\nPlease don't use this for real work...",gitInfo]);
+	alert([NSString stringWithFormat:@"Amy's meme text editor\n\n%@\n\ndo not actually use this",gitInfo]);
 }
 
 -(BOOL)validateUserInterfaceItem:(NSObject<NSValidatedUserInterfaceItem>*)item
@@ -143,7 +154,14 @@ enum
 			case TagSetting:
 				;
 				SettingsMapping* mapping=[Settings mappingWithName:menuItem.title];
-				menuItem.state=mapping.getValue?NSControlStateValueOn:NSControlStateValueOff;
+				if(mapping.supported)
+				{
+					menuItem.state=mapping.getValue?NSControlStateValueOn:NSControlStateValueOff;
+				}
+				else
+				{
+					return false;
+				}
 				break;
 			case TagTheme:
 				menuItem.state=[menuItem.title isEqual:Settings.currentThemeName]?NSControlStateValueOn:NSControlStateValueOff;

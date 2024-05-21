@@ -21,11 +21,14 @@
 	return [SettingsMapping mappingWithName:name getter:getterName setter:setterName defaultValue:defaultValue];
 }
 
+-(BOOL)supported
+{
+	return [getXcodeSettings() respondsToSelector:self.getter]&&[getXcodeSettings() respondsToSelector:self.setter];
+}
+
 -(BOOL)getValue
 {
-	// TODO: hide menu item if unsupported (e.g. minimap on Zoe)
-	
-	if([getXcodeSettings() respondsToSelector:self.getter])
+	if(self.supported)
 	{
 		return (BOOL)(long)[getXcodeSettings() performSelector:self.getter];
 	}
@@ -34,7 +37,7 @@
 
 -(void)setValue:(BOOL)value
 {
-	if([getXcodeSettings() respondsToSelector:self.setter])
+	if(self.supported)
 	{
 		[getXcodeSettings() performSelector:self.setter withObject:(id)(long)value];
 	}
@@ -42,7 +45,10 @@
 
 -(void)reset
 {
-	[self setValue:self.defaultValue];
+	if(self.supported)
+	{
+		[self setValue:self.defaultValue];
+	}
 }
 
 @end

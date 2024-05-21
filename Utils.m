@@ -23,7 +23,7 @@ void alert(NSString* message)
 __attribute__((noreturn)) void alertAbort(NSString* message)
 {
 	alert([NSString stringWithFormat:@"fatal: %@",message]);
-	
+    trace(@"%@ %@",message,NSThread.callStackSymbols);
 	abort();
 }
 

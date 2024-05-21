@@ -1,3 +1,13 @@
+// TODO: configurable?
+
+NSString* xcodePath=@"/Applications/Xcode.app";
+NSString* xcodePathPlaceholder=@"%";
+
+NSString* replaceXcodePath(NSString* path)
+{
+	return [path stringByReplacingOccurrencesOfString:xcodePathPlaceholder withString:xcodePath];
+}
+
 void (*SoftInitialize)(int,NSError**);
 Class SoftDocument;
 Class SoftViewController;
@@ -59,10 +69,10 @@ XcodeDocument* getXcodeDocument(NSURL* url,NSString* type)
 
 // TODO: uhh
 
-@interface FakeExtension:NSObject
+@interface HackExtension:NSObject
 @end
 
-@implementation FakeExtension
+@implementation HackExtension
 
 -(NSString*)identifier
 {
@@ -75,7 +85,7 @@ XcodeViewController* getXcodeViewController(XcodeDocument* document)
 {
 	XcodeViewController* controller=[(XcodeViewController*)[SoftViewController alloc] initWithNibName:nil bundle:nil document:document].autorelease;
 	
-	controller.representedExtension=FakeExtension.alloc.init.autorelease;
+	controller.representedExtension=HackExtension.alloc.init.autorelease;
 	controller.fileTextSettings=((NSObject*)[SoftSettings2 alloc]).init.autorelease;
 	
 	return controller;
@@ -100,14 +110,21 @@ XcodeThemeManager* getXcodeThemeManager()
 	return [SoftTheme2 preferenceSetsManager];
 }
 
-id returnNil()
+id hackReturnNil()
 {
 	return nil;
 }
 
+NSMenu* (^contextMenuHook)()=NULL;
+NSMenu* hackContextMenu()
+{
+	return contextMenuHook();
+}
+
 void linkXcode()
 {
-	if(!dlopen("/Applications/Xcode.app/Contents/PlugIns/IDESourceEditor.framework/Versions/A/IDESourceEditor",RTLD_LAZY))
+	NSString* dylibPath=replaceXcodePath(@"%/Contents/PlugIns/IDESourceEditor.framework/Versions/A/IDESourceEditor");
+	if(!dlopen(dylibPath.UTF8String,RTLD_LAZY))
 	{
 		alertAbort([NSString stringWithFormat:@"dlopen failed %s",dlerror()]);
 	}
@@ -127,7 +144,7 @@ void linkXcode()
 	
 	// TODO: stupid
 	
-	swizzle(@"IDEDocumentController",@"sharedDocumentController",false,(IMP)returnNil,NULL);
+	swizzle(@"IDEDocumentController",@"sharedDocumentController",false,(IMP)hackReturnNil,NULL);
 	
 	NSError* error=nil;
 	SoftInitialize(2,&error);
@@ -137,6 +154,10 @@ void linkXcode()
 	}
 	
 	[SoftTheme initialize];
+	
+	// TODO: even stupider
+	
+	swizzle(@"_TtC12SourceEditor16SourceEditorView",@"menuForEvent:",true,(IMP)hackContextMenu,NULL);
 }
 
 void restartIfNeeded(char** argv)
@@ -145,11 +166,9 @@ void restartIfNeeded(char** argv)
 	
 	if(!getenv("DYLD_FRAMEWORK_PATH"))
 	{
-		// TODO: define properly (this for HS; fewer strictly needed on Sonoma)
-		// TODO: configurable Xcode location?
-		
-		setenv("DYLD_FRAMEWORK_PATH","/Applications/Xcode.app/Contents/Frameworks:/Applications/Xcode.app/Contents/SharedFrameworks:/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks:/Applications/Xcode.app/Contents/Developer/Library/Frameworks",true);
-		setenv("DYLD_LIBRARY_PATH","/Applications/Xcode.app/Contents/Frameworks",true);
+		NSString* dylibPaths=replaceXcodePath(@"%/Contents/Frameworks:%/Contents/SharedFrameworks:%/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks:%/Contents/Developer/Library/Frameworks");
+		setenv("DYLD_FRAMEWORK_PATH",dylibPaths.UTF8String,true);
+		setenv("DYLD_LIBRARY_PATH",dylibPaths.UTF8String,true);
 		execv(argv[0],argv);
 		
 		alertAbort(@"re-exec failed");

@@ -5,18 +5,18 @@
 	// TODO: implement numeric settings, cases that need reload currently, etc
 	
 	return @[
-		[SettingsMapping mappingWithName:@"Line Numbers" getter:@"showLineNumbers" defaultValue:true],
-		[SettingsMapping mappingWithName:@"Code Folding" getter:@"showCodeFoldingSidebar" defaultValue:false],
-		[SettingsMapping mappingWithName:@"Minimap (Needs Reload)" getter:@"showMinimap" defaultValue:true],
-		[SettingsMapping mappingWithName:@"Page Guide" getter:@"showPageGuide" defaultValue:false],
-		[SettingsMapping mappingWithName:@"Structure Headers" getter:@"showStructureHeaders" defaultValue:true],
-		[SettingsMapping mappingWithName:@"Invisible Characters (Needs Reload)" getter:@"showInvisibleCharacters" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Show Line Numbers" getter:@"showLineNumbers" defaultValue:true],
+		[SettingsMapping mappingWithName:@"Show Folding Sidebar" getter:@"showCodeFoldingSidebar" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Show Minimap (Needs Reload)" getter:@"showMinimap" defaultValue:true],
+		[SettingsMapping mappingWithName:@"Show Page Guide" getter:@"showPageGuide" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Show Structure Headers" getter:@"showStructureHeaders" defaultValue:true],
+		[SettingsMapping mappingWithName:@"Show Invisible Characters (Needs Reload)" getter:@"showInvisibleCharacters" defaultValue:false],
 		[SettingsMapping mappingWithName:@"Indent Using Tabs" getter:@"useTabsToIndent" defaultValue:true],
-		[SettingsMapping mappingWithName:@"Syntax-Aware Indentation" getter:@"useSyntaxAwareIndenting" defaultValue:false],
-		[SettingsMapping mappingWithName:@"Close Block Comment" getter:@"autoCloseBlockComment" defaultValue:false],
-		[SettingsMapping mappingWithName:@"Close Brace" getter:@"autoInsertClosingBrace" defaultValue:false],
-		[SettingsMapping mappingWithName:@"Match Close Bracket" getter:@"autoInsertOpenBracket" defaultValue:false],
-		[SettingsMapping mappingWithName:@"Type-Over Delimiters" getter:@"enableTypeOverCompletions" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Use Syntax-Aware Indentation" getter:@"useSyntaxAwareIndenting" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Close Block Comments" getter:@"autoCloseBlockComment" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Close Braces" getter:@"autoInsertClosingBrace" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Match Closing Brackets" getter:@"autoInsertOpenBracket" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Use Type-Over Delimiters" getter:@"enableTypeOverCompletions" defaultValue:false],
 		[SettingsMapping mappingWithName:@"Enclose Selection in Delimiters" getter:@"autoEncloseSelectionInDelimiters" defaultValue:false],
 		[SettingsMapping mappingWithName:@"Soft Wrap Lines" getter:@"wrapLines" defaultValue:true],
 		[SettingsMapping mappingWithName:@"Trim Trailing Whitespace" getter:@"trimTrailingWhitespace" defaultValue:true],
@@ -25,7 +25,7 @@
 		// TODO: doesn't work
 		// [SettingsMapping mappingWithName:@"Completions on Esc" getter:@"showCompletionsOnEsc"],
 		
-		[SettingsMapping mappingWithName:@"Vi Mode" getter:@"useViKeyBindings" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Use Vi Mode" getter:@"useViKeyBindings" defaultValue:false]
 	];
 }
 

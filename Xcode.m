@@ -4,10 +4,17 @@ Class SoftViewController;
 Class SoftTheme;
 Class SoftSettings;
 Class SoftSettings2;
+Class SoftDocumentLocation;
 
 @interface XcodeDocument:NSDocument
 
 -(instancetype)initWithContentsOfURL:(NSURL*)url ofType:(NSString*)type error:(NSError**)error;
+
+@end
+
+@interface XcodeDocumentLocation:NSObject
+
+-(instancetype)initWithDocumentURL:(NSURL*)url timestamp:(NSNumber*)timestamp characterRange:(NSRange)range;
 
 @end
 
@@ -17,6 +24,7 @@ Class SoftSettings2;
 @property(retain) NSObject* fileTextSettings;
 
 -(instancetype)initWithNibName:(NSString*)nib bundle:(NSBundle*)bundle document:(NSDocument*)document;
+-(void)selectDocumentLocations:(NSArray<XcodeDocumentLocation*>*)locations;
 
 @end
 
@@ -55,7 +63,16 @@ XcodeViewController* getXcodeViewController(XcodeDocument* document)
 	return controller;
 }
 
-NSObject* getXcodeSettings()
+// TODO: weird to separate from above, but asserts view loaded..
+
+void focusXcodeViewController(XcodeViewController* controller)
+{
+	NSURL* fakeURL=[NSURL.alloc initWithString:@""].autorelease;
+	XcodeDocumentLocation* location=[(XcodeDocumentLocation*)[SoftDocumentLocation alloc] initWithDocumentURL:fakeURL timestamp:nil characterRange:NSMakeRange(0,0)].autorelease;
+	[controller selectDocumentLocations:@[location]];
+}
+
+XcodeSettings* getXcodeSettings()
 {
 	return [SoftSettings sharedPreferences];
 }
@@ -78,7 +95,8 @@ void linkXcode()
 	SoftTheme=NSClassFromString(@"DVTTheme");
 	SoftSettings=NSClassFromString(@"DVTTextPreferences");
 	SoftSettings2=NSClassFromString(@"IDEFileTextSettings");
-	if(!(SoftInitialize&&SoftDocument&&SoftViewController&&SoftTheme&&SoftSettings&&SoftSettings2))
+	SoftDocumentLocation=NSClassFromString(@"DVTTextDocumentLocation");
+	if(!(SoftInitialize&&SoftDocument&&SoftViewController&&SoftTheme&&SoftSettings&&SoftSettings2&&SoftDocumentLocation))
 	{
 		alertAbort(@"symbol missing");
 	}

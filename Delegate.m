@@ -111,7 +111,7 @@
 
 -(void)amyAbout:(NSMenuItem*)sender
 {
-	alert([NSString stringWithFormat:@"Amy's meme text editor\n(built %s)\n\nPlease don't use this for real work...",__DATE__]);
+	alert([NSString stringWithFormat:@"Amy's meme text editor\n\n%s\n\nPlease don't use this for real work...",stringify(gitHash)]);
 }
 
 -(BOOL)validateUserInterfaceItem:(NSObject<NSValidatedUserInterfaceItem>*)item

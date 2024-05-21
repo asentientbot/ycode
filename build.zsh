@@ -7,11 +7,11 @@ class=Document
 type=public.text
 minVersion=12
 
-rm -rf "$name.app"
+rm -rf "$name.app" "$name.zip"
 mkdir -p "$name.app/Contents/MacOS"
 mkdir -p "$name.app/Contents/Resources"
 
-clang -fmodules -Wno-unused-getter-return-value -Wno-objc-missing-super-calls -mmacosx-version-min=$minVersion main.m -o "$name.app/Contents/MacOS/$name"
+clang -fmodules -Wno-unused-getter-return-value -Wno-objc-missing-super-calls -mmacosx-version-min=$minVersion -DgitHash=$(git log -1 --format=%H) main.m -o "$name.app/Contents/MacOS/$name"
 
 clang -fmodules -Wno-deprecated-declarations icon.m -o icon
 ./icon
@@ -39,5 +39,9 @@ do
 done
 
 codesign -f -s - "$name.app"
+zip -r "$name.zip" "$name.app"
 
+set +e
+rm -rf icon icon.png icon.iconset
+defaults delete $id
 "./$name.app/Contents/MacOS/$name"

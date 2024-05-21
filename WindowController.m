@@ -4,20 +4,20 @@
 {
 	self=super.init;
 	
-	// TODO: a
+	CGRect screen=NSScreen.mainScreen.frame;
+	int width=600;
+	int height=400;
+	CGRect rect=CGRectMake((screen.size.width-width)/2,(screen.size.height-height)/2,width,height);
 	
-	CGRect rect=CGRectMake(0,999999,600,600);
 	NSWindowStyleMask style=NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable;
 	self.window=[NSWindow.alloc initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:false].autorelease;
 	self.window.tabbingMode=NSWindowTabbingModePreferred;
-	
-	// TODO: what
-	
 	self.window.frameAutosaveName=getAppName();
-	[self.window setFrameUsingName:getAppName()];
 	
 	self.xcodeViewController=getXcodeViewController(document.xcodeDocument);
 	self.window.contentView=self.xcodeViewController.view;
+	
+	focusXcodeViewController(self.xcodeViewController);
 	
 	return self;
 }

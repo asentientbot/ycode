@@ -1,3 +1,6 @@
+#define stringify2(macro) #macro
+#define stringify(macro) stringify2(macro)
+
 NSString* getAppName()
 {
 	return NSProcessInfo.processInfo.arguments[0].lastPathComponent;

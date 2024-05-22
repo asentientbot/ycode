@@ -42,6 +42,8 @@ enum
 		Settings.reset;
 	}
 	
+	self.lastCascadePoint=CGPointMake(INT_MAX,INT_MAX);
+	
 	contextMenuHook=[^()
 	{
 		NSMenu* menu=NSMenu.alloc.init.autorelease;

@@ -4,11 +4,7 @@
 {
 	self=super.init;
 	
-	CGRect screen=NSScreen.mainScreen.frame;
-	int width=600;
-	int height=500;
-	CGRect rect=CGRectMake((screen.size.width-width)/2,(screen.size.height-height)/2,width,height);
-	
+	CGRect rect=CGRectMake(0,0,600,500);
 	NSWindowStyleMask style=NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable;
 	self.window=[NSWindow.alloc initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:false].autorelease;
 	
@@ -17,17 +13,14 @@
 	Delegate* delegate=(Delegate*)NSApp.delegate;
 	if(delegate.shouldMakeTab)
 	{
+		[self.window cascadeTopLeftFromPoint:CGPointMake(INT_MAX,INT_MAX)];
+		
 		self.window.tabbingMode=NSWindowTabbingModePreferred;
 		self.window.frameAutosaveName=getAppName();
 	}
 	else
 	{
-		CGPoint origin=rect.origin;
-		if(!CGPointEqualToPoint(delegate.lastCascadePoint,CGPointZero))
-		{
-			origin=delegate.lastCascadePoint;
-		}
-		delegate.lastCascadePoint=[self.window cascadeTopLeftFromPoint:origin];
+		delegate.lastCascadePoint=[self.window cascadeTopLeftFromPoint:delegate.lastCascadePoint];
 	}
 	
 	self.xcodeViewController=getXcodeViewController(document.xcodeDocument);

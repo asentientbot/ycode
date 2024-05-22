@@ -88,24 +88,24 @@
 	theme.defaultFont=regular;
 	theme.defaultColor=@"0.3 0.3 0.6 1";
 	
-	theme.backgroundColor=@"1 0.92 1 1";
-	theme.highlightColor=@"1 0.84 1 1";
-	theme.selectionColor=@"1 0.76 1 1";
+	theme.backgroundColor=@"1 0.94 1 1";
+	theme.highlightColor=@"1 0.88 1 1";
+	theme.selectionColor=@"1 0.82 1 1";
 	
 	theme.commentFont=italic;
 	theme.commentColor=@"0.4 0.4 0.8 1";
 	theme.preprocessorFont=regular;
 	theme.preprocessorColor=theme.commentColor;
 	theme.classFont=bold;
-	theme.classColor=@"0 0.7 0.6 1";
+	theme.classColor=@"0 0.6 0.5 1";
 	theme.functionFont=regular;
 	theme.functionColor=theme.classColor;
 	theme.keywordFont=bold;
-	theme.keywordColor=@"0.7 0 0.9 1";
+	theme.keywordColor=@"0.8 0 0.9 1";
 	theme.stringFont=bold;
 	theme.stringColor=@"0.9 0.4 0.8 1";
 	theme.numberFont=bold;
-	theme.numberColor=@"0.4 0.5 1 1";
+	theme.numberColor=@"0.3 0.6 1 1";
 	
 	[theme saveWithName:getAppName()];
 	[Settings setCurrentThemeName:getAppName()];

@@ -44,4 +44,5 @@ zip -r "$name.zip" "$name.app"
 set +e
 rm -rf icon icon.png icon.iconset
 defaults delete $id
+rm ~/"Library/Developer/Xcode/UserData/FontAndColorThemes/$name.xccolortheme"
 "./$name.app/Contents/MacOS/$name"

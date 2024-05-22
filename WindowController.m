@@ -16,7 +16,6 @@
 	
 	self.xcodeViewController=getXcodeViewController(document.xcodeDocument);
 	self.window.contentView=self.xcodeViewController.view;
-	
 	focusXcodeViewController(self.xcodeViewController);
 	
 	return self;

@@ -11,6 +11,7 @@
 		[SettingsMapping mappingWithName:@"Show Page Guide" getter:@"showPageGuide" defaultValue:false],
 		[SettingsMapping mappingWithName:@"Show Structure Headers" getter:@"showStructureHeaders" defaultValue:true],
 		[SettingsMapping mappingWithName:@"Show Invisible Characters (May Need Reload)" getter:@"showInvisibleCharacters" defaultValue:false],
+		[SettingsMapping mappingWithName:@"Fade Comment Delimiters" getter:@"fadeCommentDelimiters" defaultValue:false],
 		[SettingsMapping mappingWithName:@"Indent Using Tabs" getter:@"useTabsToIndent" defaultValue:true],
 		[SettingsMapping mappingWithName:@"Use Syntax-Aware Indentation" getter:@"useSyntaxAwareIndenting" defaultValue:false],
 		[SettingsMapping mappingWithName:@"Close Block Comments" getter:@"autoCloseBlockComment" defaultValue:false],
@@ -21,10 +22,6 @@
 		[SettingsMapping mappingWithName:@"Soft Wrap Lines" getter:@"wrapLines" defaultValue:true],
 		[SettingsMapping mappingWithName:@"Trim Trailing Whitespace" getter:@"trimTrailingWhitespace" defaultValue:true],
 		[SettingsMapping mappingWithName:@"Suggest Completions" getter:@"autoSuggestCompletions" defaultValue:false],
-		
-		// TODO: doesn't work
-		// [SettingsMapping mappingWithName:@"Completions on Esc" getter:@"showCompletionsOnEsc"],
-		
 		[SettingsMapping mappingWithName:@"Use Vi Mode" getter:@"useViKeyBindings" defaultValue:false]
 	];
 }
@@ -47,14 +44,9 @@
 	return nil;
 }
 
-+(NSArray<XcodeTheme2*>*)allThemes
-{
-	return getXcodeThemeManager().availablePreferenceSets;
-}
-
 +(NSArray<NSString*>*)allThemeNames
 {
-	NSArray<NSString*>* names=[Settings.allThemes valueForKeyPath:@"localizedName"];
+	NSArray<NSString*>* names=[getXcodeThemeManager().availablePreferenceSets valueForKeyPath:@"localizedName"];
 	return [names sortedArrayUsingSelector:@selector(compare:)];
 }
 
@@ -65,7 +57,7 @@
 
 +(void)setCurrentThemeName:(NSString*)name
 {
-	for(XcodeTheme2* theme in Settings.allThemes)
+	for(XcodeTheme2* theme in getXcodeThemeManager().availablePreferenceSets)
 	{
 		if([theme.localizedName isEqual:name])
 		{
@@ -82,7 +74,41 @@
 		mapping.reset;
 	}
 	
-	[Settings setCurrentThemeName:@"Default (Light)"];
+	Settings.setSampleTheme;
+}
+
++(void)setSampleTheme
+{
+	ThemeMapping* theme=ThemeMapping.alloc.init.autorelease;
+	
+	NSString* regular=@"SFMono-Regular - 13.0";
+	NSString* italic=@"SFMono-RegularItalic - 13.0";
+	NSString* bold=@"SFMono-Bold - 13.0";
+	
+	theme.defaultFont=regular;
+	theme.defaultColor=@"0.3 0.3 0.6 1";
+	
+	theme.backgroundColor=@"1 0.92 1 1";
+	theme.highlightColor=@"1 0.84 1 1";
+	theme.selectionColor=@"1 0.76 1 1";
+	
+	theme.commentFont=italic;
+	theme.commentColor=@"0.4 0.4 0.8 1";
+	theme.preprocessorFont=regular;
+	theme.preprocessorColor=theme.commentColor;
+	theme.classFont=bold;
+	theme.classColor=@"0 0.7 0.6 1";
+	theme.functionFont=regular;
+	theme.functionColor=theme.classColor;
+	theme.keywordFont=bold;
+	theme.keywordColor=@"0.7 0 0.9 1";
+	theme.stringFont=bold;
+	theme.stringColor=@"0.9 0.4 0.8 1";
+	theme.numberFont=bold;
+	theme.numberColor=@"0.4 0.5 1 1";
+	
+	[theme saveWithName:getAppName()];
+	[Settings setCurrentThemeName:getAppName()];
 }
 
 @end

@@ -18,9 +18,14 @@ enum
 -(NSMenuItem*)addItemTitle:(NSString*)title action:(NSString*)action key:(NSString*)key mask:(NSEventModifierFlags)mask to:(NSMenu*)menu
 {
 	NSMenuItem* item=[NSMenuItem.alloc initWithTitle:title action:NSSelectorFromString(action) keyEquivalent:key].autorelease;
-	item.keyEquivalentModifierMask=NSEventModifierFlagCommand|mask;
+	item.keyEquivalentModifierMask=mask;
 	[menu addItem:item];
 	return item;
+}
+
+-(NSMenuItem*)addItemTitle:(NSString*)title action:(NSString*)action key:(NSString*)key to:(NSMenu*)menu
+{
+	return [self addItemTitle:title action:action key:key mask:NSEventModifierFlagCommand to:menu];
 }
 
 -(void)addSeparatorTo:(NSMenu*)menu
@@ -41,9 +46,9 @@ enum
 	{
 		NSMenu* menu=NSMenu.alloc.init.autorelease;
 		
-		[self addItemTitle:@"Cut" action:@"cut:" key:@"" mask:0 to:menu];
-		[self addItemTitle:@"Copy" action:@"copy:" key:@"" mask:0 to:menu];
-		[self addItemTitle:@"Paste" action:@"paste:" key:@"" mask:0 to:menu];
+		[self addItemTitle:@"Cut" action:@"cut:" key:@"" to:menu];
+		[self addItemTitle:@"Copy" action:@"copy:" key:@"" to:menu];
+		[self addItemTitle:@"Paste" action:@"paste:" key:@"" to:menu];
 		
 		return menu;
 	} copy];
@@ -51,56 +56,57 @@ enum
 	NSMenu* bar=NSMenu.alloc.init.autorelease;
 	
 	NSMenu* titleMenu=[self addMenuTitle:getAppName() to:bar];
-	[self addItemTitle:[@"About " stringByAppendingString:getAppName()] action:@"amyAbout:" key:@"" mask:0 to:titleMenu];
+	[self addItemTitle:[@"About " stringByAppendingString:getAppName()] action:@"amyAbout:" key:@"" to:titleMenu];
 	[self addSeparatorTo:titleMenu];
 	for(NSString* name in Settings.allMappingNames)
 	{
-		[self addItemTitle:name action:@"amySettingsToggle:" key:@"" mask:0 to:titleMenu].tag=TagSetting;
+		[self addItemTitle:name action:@"amySettingsToggle:" key:@"" to:titleMenu].tag=TagSetting;
 	}
 	[self addSeparatorTo:titleMenu];
-	[self addItemTitle:@"Reset Settings (May Need Reload)" action:@"amySettingsReset:" key:@"" mask:0 to:titleMenu];
+	[self addItemTitle:@"Reset Settings (May Need Reload)" action:@"amySettingsReset:" key:@"" to:titleMenu];
 	[self addSeparatorTo:titleMenu];
-	[self addItemTitle:@"Quit" action:@"terminate:" key:@"q" mask:0 to:titleMenu];
+	[self addItemTitle:@"Quit" action:@"terminate:" key:@"q" to:titleMenu];
 	
 	NSMenu* fileMenu=[self addMenuTitle:@"File" to:bar];
-	[self addItemTitle:@"New" action:@"newDocument:" key:@"n" mask:0 to:fileMenu];
-	[self addItemTitle:@"Open" action:@"openDocument:" key:@"o" mask:0 to:fileMenu];
+	[self addItemTitle:@"New Window" action:@"amyNewWindow:" key:@"n" to:fileMenu];
+	[self addItemTitle:@"New Tab" action:@"amyNewTab:" key:@"n" mask:NSEventModifierFlagCommand|NSEventModifierFlagOption to:fileMenu];
+	[self addItemTitle:@"Open" action:@"openDocument:" key:@"o" to:fileMenu];
 	[self addSeparatorTo:fileMenu];
-	[self addItemTitle:@"Close" action:@"performClose:" key:@"w" mask:0 to:fileMenu];
+	[self addItemTitle:@"Close" action:@"performClose:" key:@"w" to:fileMenu];
 	[self addSeparatorTo:fileMenu];
-	[self addItemTitle:@"Save" action:@"amySave:" key:@"s" mask:0 to:fileMenu];
+	[self addItemTitle:@"Save" action:@"amySave:" key:@"s" to:fileMenu];
 	
 	NSMenu* editMenu=[self addMenuTitle:@"Edit" to:bar];
-	[self addItemTitle:@"Undo" action:@"undo:" key:@"z" mask:0 to:editMenu];
-	[self addItemTitle:@"Redo" action:@"redo:" key:@"Z" mask:0 to:editMenu];
+	[self addItemTitle:@"Undo" action:@"undo:" key:@"z" to:editMenu];
+	[self addItemTitle:@"Redo" action:@"redo:" key:@"Z" to:editMenu];
 	[self addSeparatorTo:editMenu];
-	[self addItemTitle:@"Cut" action:@"cut:" key:@"x" mask:0 to:editMenu];
-	[self addItemTitle:@"Copy" action:@"copy:" key:@"c" mask:0 to:editMenu];
-	[self addItemTitle:@"Paste" action:@"paste:" key:@"v" mask:0 to:editMenu];
+	[self addItemTitle:@"Cut" action:@"cut:" key:@"x" to:editMenu];
+	[self addItemTitle:@"Copy" action:@"copy:" key:@"c" to:editMenu];
+	[self addItemTitle:@"Paste" action:@"paste:" key:@"v" to:editMenu];
 	[self addSeparatorTo:editMenu];
-	[self addItemTitle:@"Select All" action:@"selectAll:" key:@"a" mask:0 to:editMenu];
+	[self addItemTitle:@"Select All" action:@"selectAll:" key:@"a" to:editMenu];
 	[self addSeparatorTo:editMenu];
-	[self addItemTitle:@"Shift Left" action:@"shiftLeft:" key:@"[" mask:0 to:editMenu];
-	[self addItemTitle:@"Shift Right" action:@"shiftRight:" key:@"]" mask:0 to:editMenu];
+	[self addItemTitle:@"Shift Left" action:@"shiftLeft:" key:@"[" to:editMenu];
+	[self addItemTitle:@"Shift Right" action:@"shiftRight:" key:@"]" to:editMenu];
 	[self addSeparatorTo:editMenu];
-	[self addItemTitle:@"Find" action:@"findAndReplace:" key:@"f" mask:0 to:editMenu];
-	[self addItemTitle:@"Find Next" action:@"findNext:" key:@"g" mask:0 to:editMenu];
-	[self addItemTitle:@"Find Previous" action:@"findPrevious:" key:@"G" mask:0 to:editMenu];
+	[self addItemTitle:@"Find" action:@"findAndReplace:" key:@"f" to:editMenu];
+	[self addItemTitle:@"Find Next" action:@"findNext:" key:@"g" to:editMenu];
+	[self addItemTitle:@"Find Previous" action:@"findPrevious:" key:@"G" to:editMenu];
 	
 	NSMenu* viewMenu=[self addMenuTitle:@"View" to:bar];
 	for(NSString* name in Settings.allThemeNames)
 	{
-		[self addItemTitle:name action:@"amySetTheme:" key:@"" mask:0 to:viewMenu].tag=TagTheme;
+		[self addItemTitle:name action:@"amySetTheme:" key:@"" to:viewMenu].tag=TagTheme;
 	}
 	[self addSeparatorTo:viewMenu];
-	[self addItemTitle:@"Enter Full Screen" action:@"toggleFullScreen:" key:@"f" mask:NSEventModifierFlagControl to:viewMenu];
+	[self addItemTitle:@"Enter Full Screen" action:@"toggleFullScreen:" key:@"f" mask:NSEventModifierFlagCommand|NSEventModifierFlagControl to:viewMenu];
 	
 	NSMenu* windowMenu=[self addMenuTitle:@"Window" to:bar];
-	[self addItemTitle:@"Minimize" action:@"performMiniaturize:" key:@"m" mask:0 to:windowMenu];
-	[self addItemTitle:@"Zoom" action:@"performZoom:" key:@"" mask:0 to:windowMenu];
+	[self addItemTitle:@"Minimize" action:@"performMiniaturize:" key:@"m" to:windowMenu];
+	[self addItemTitle:@"Zoom" action:@"performZoom:" key:@"" to:windowMenu];
 	[self addSeparatorTo:windowMenu];
-	[self addItemTitle:@"Show Previous Tab" action:@"selectPreviousTab:" key:@"←" mask:NSEventModifierFlagOption to:windowMenu];
-	[self addItemTitle:@"Show Next Tab" action:@"selectNextTab:" key:@"→" mask:NSEventModifierFlagOption to:windowMenu];
+	[self addItemTitle:@"Show Previous Tab" action:@"selectPreviousTab:" key:@"←" mask:NSEventModifierFlagCommand|NSEventModifierFlagOption to:windowMenu];
+	[self addItemTitle:@"Show Next Tab" action:@"selectNextTab:" key:@"→" mask:NSEventModifierFlagCommand|NSEventModifierFlagOption to:windowMenu];
 	[self addSeparatorTo:windowMenu];
 	for(int index=1;index<10;index++)
 	{
@@ -114,10 +120,28 @@ enum
 			title=[NSString stringWithFormat:@"Show Tab %d",index];
 		}
 		NSString* key=[NSString stringWithFormat:@"%d",index];
-		[self addItemTitle:title action:@"amySelectTab:" key:key mask:0 to:windowMenu];
+		[self addItemTitle:title action:@"amySelectTab:" key:key to:windowMenu];
 	}
 	
 	NSApp.mainMenu=bar;
+}
+
+-(void)amyNewWindow:(NSMenuItem*)sender
+{
+	self.nextWindowIsNotTab=true;
+	[NSDocumentController.sharedDocumentController newDocument:nil];
+}
+
+-(void)amyNewTab:(NSMenuItem*)sender
+{
+	[NSDocumentController.sharedDocumentController newDocument:nil];
+}
+
+-(BOOL)shouldMakeTab
+{
+	BOOL result=!self.nextWindowIsNotTab;
+	self.nextWindowIsNotTab=false;
+	return result;
 }
 
 -(void)amySelectTab:(NSMenuItem*)sender

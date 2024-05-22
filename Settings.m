@@ -88,16 +88,16 @@
 	theme.defaultFont=regular;
 	theme.defaultColor=@"0.3 0.3 0.6 1";
 	
-	theme.backgroundColor=@"1 0.94 1 1";
-	theme.highlightColor=@"1 0.88 1 1";
-	theme.selectionColor=@"1 0.82 1 1";
+	theme.backgroundColor=@"1 0.96 1 1";
+	theme.highlightColor=@"1 0.9 1 1";
+	theme.selectionColor=@"1 0.8 1 1";
 	
 	theme.commentFont=italic;
 	theme.commentColor=@"0.4 0.4 0.8 1";
 	theme.preprocessorFont=regular;
 	theme.preprocessorColor=theme.commentColor;
 	theme.classFont=bold;
-	theme.classColor=@"0 0.6 0.5 1";
+	theme.classColor=@"0 0.5 0.4 1";
 	theme.functionFont=regular;
 	theme.functionColor=theme.classColor;
 	theme.keywordFont=bold;

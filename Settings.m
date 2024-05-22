@@ -103,7 +103,7 @@
 	theme.keywordFont=bold;
 	theme.keywordColor=@"0.8 0 1 1";
 	theme.stringFont=bold;
-	theme.stringColor=@"0.9 0.5 0.8 1";
+	theme.stringColor=@"0.85 0.5 0.8 1";
 	theme.numberFont=bold;
 	theme.numberColor=@"0.3 0.6 1 1";
 	

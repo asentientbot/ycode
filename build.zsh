@@ -4,7 +4,7 @@ cd "$(dirname "$0")"
 name=Ycode
 id=website.amys.ycode2
 class=Document
-type=public.text
+type=public.data
 minVersion=10.13
 
 rm -rf "$name.app" "$name.zip"
@@ -29,11 +29,11 @@ add CFBundleIdentifier string $id
 add CFBundleIconFile string Icon.icns
 add NSHighResolutionCapable bool true
 add CFBundleDocumentTypes array
-add CFBundleDocumentTypes:0 dict
+add CFBundleDocumentTypes: dict
 add CFBundleDocumentTypes:0:NSDocumentClass string $class
 add CFBundleDocumentTypes:0:CFBundleTypeRole string Editor
 add CFBundleDocumentTypes:0:LSItemContentTypes array
-add CFBundleDocumentTypes:0:LSItemContentTypes:0 string $type" | while read command
+add CFBundleDocumentTypes:0:LSItemContentTypes: string $type" | while read command
 do
 	/usr/libexec/PlistBuddy "$name.app/Contents/Info.plist" -c "$command"
 done

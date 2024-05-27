@@ -36,6 +36,7 @@ Class SoftDocumentLocation;
 
 -(instancetype)initWithNibName:(NSString*)nib bundle:(NSBundle*)bundle document:(NSDocument*)document;
 -(void)selectDocumentLocations:(NSArray<XcodeDocumentLocation*>*)locations;
+-(NSScrollView*)mainScrollView;
 
 @end
 
@@ -47,10 +48,18 @@ Class SoftDocumentLocation;
 
 @class XcodeThemeManager;
 
+#define XcodeLightThemeKey @"XCFontAndColorCurrentTheme"
+#define XcodeDarkThemeKey @"XCFontAndColorCurrentDarkTheme"
+#define XcodeThemeChangedKey @"DVTFontAndColorSettingsChangedNotification"
+
 @interface XcodeTheme2:NSObject
 
 +(XcodeThemeManager*)preferenceSetsManager;
 -(NSString*)localizedName;
+-(NSString*)name;
+-(BOOL)hasLightBackground;
+-(NSColor*)sourceTextBackgroundColor;
+-(NSColor*)sourceTextCurrentLineHighlightColor;
 
 @end
 

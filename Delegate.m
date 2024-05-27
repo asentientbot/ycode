@@ -42,8 +42,6 @@ enum
 		Settings.reset;
 	}
 	
-	self.lastCascadePoint=CGPointMake(INT_MAX,INT_MAX);
-	
 	contextMenuHook=[^()
 	{
 		NSMenu* menu=NSMenu.alloc.init.autorelease;
@@ -70,8 +68,7 @@ enum
 	[self addItemTitle:@"Quit" action:@"terminate:" key:@"q" to:titleMenu];
 	
 	NSMenu* fileMenu=[self addMenuTitle:@"File" to:bar];
-	[self addItemTitle:@"New Window" action:@"amyNewWindow:" key:@"n" to:fileMenu];
-	[self addItemTitle:@"New Tab" action:@"amyNewTab:" key:@"n" mask:NSEventModifierFlagCommand|NSEventModifierFlagOption to:fileMenu];
+	[self addItemTitle:@"New" action:@"newDocument:" key:@"n" to:fileMenu];
 	[self addItemTitle:@"Open" action:@"openDocument:" key:@"o" to:fileMenu];
 	[self addSeparatorTo:fileMenu];
 	[self addItemTitle:@"Close" action:@"performClose:" key:@"w" to:fileMenu];
@@ -126,24 +123,6 @@ enum
 	}
 	
 	NSApp.mainMenu=bar;
-}
-
--(void)amyNewWindow:(NSMenuItem*)sender
-{
-	self.nextWindowIsNotTab=true;
-	[NSDocumentController.sharedDocumentController newDocument:nil];
-}
-
--(void)amyNewTab:(NSMenuItem*)sender
-{
-	[NSDocumentController.sharedDocumentController newDocument:nil];
-}
-
--(BOOL)shouldMakeTab
-{
-	BOOL result=!self.nextWindowIsNotTab;
-	self.nextWindowIsNotTab=false;
-	return result;
 }
 
 -(void)amySelectTab:(NSMenuItem*)sender

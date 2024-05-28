@@ -2,16 +2,8 @@
 
 -(void)saveWithName:(NSString*)name
 {
-	NSData* baseData=nil;
-	for(NSString* possiblePath in @[@"%/Contents/SharedFrameworks/DVTUserInterfaceKit.framework/Versions/A/Resources/FontAndColorThemes/Default (Light).xccolortheme",@"%/Contents/SharedFrameworks/DVTKit.framework/Versions/A/Resources/FontAndColorThemes/Default (Light).xccolortheme"])
-	{
-		NSString* basePath=replaceXcodePath(possiblePath);
-		baseData=[NSData dataWithContentsOfFile:basePath];
-		if(baseData)
-		{
-			break;
-		}
-	}
+	NSString* basePath=[getXcodeSystemThemesPath() stringByAppendingPathComponent:@"Default (Light).xccolortheme"];
+	NSData* baseData=[NSData dataWithContentsOfFile:basePath];
 	if(!baseData)
 	{
 		alertAbort(@"base theme missing");
@@ -23,53 +15,52 @@
 		alertAbort(@"base theme broken");
 	}
 	
-	custom[@"DVTSourceTextBackground"]=self.backgroundColor;
-	custom[@"DVTSourceTextCurrentLineHighlightColor"]=self.highlightColor;
-	custom[@"DVTSourceTextSelectionColor"]=self.selectionColor;
+	custom[XcodeThemeBackgroundKey]=self.backgroundColor;
+	custom[XcodeThemeHighlightKey]=self.highlightColor;
+	custom[XcodeThemeSelectionKey]=self.selectionColor;
+	custom[XcodeThemeCursorKey]=self.defaultColor;
+	custom[XcodeThemeInvisiblesKey]=self.commentColor;
 	
-	custom[@"DVTSourceTextInsertionPointColor"]=self.defaultColor;
-	custom[@"DVTSourceTextInvisiblesColor"]=self.commentColor;
-	
-	NSMutableDictionary* innerFonts=custom[@"DVTSourceTextSyntaxFonts"];
-	NSMutableDictionary* innerColors=custom[@"DVTSourceTextSyntaxColors"];
+	NSMutableDictionary* innerFonts=custom[XcodeThemeFontsKey];
+	NSMutableDictionary* innerColors=custom[XcodeThemeColorsKey];
 	for(NSString* key in innerColors.allKeys)
 	{
 		NSString* font=self.defaultFont;
 		NSString* color=self.defaultColor;
 		
-		if([@[@"xcode.syntax.comment",@"xcode.syntax.comment.doc",@"xcode.syntax.comment.doc.keyword",@"xcode.syntax.mark",@"xcode.syntax.url"] containsObject:key])
+		if([XcodeThemeCommentKeys containsObject:key])
 		{
 			font=self.commentFont;
 			color=self.commentColor;
 		}
-		else if([@[@"xcode.syntax.preprocessor"] containsObject:key])
+		else if([XcodeThemePreprocessorKeys containsObject:key])
 		{
 			font=self.preprocessorFont;
 			color=self.preprocessorColor;
 		}
-		else if([@[@"xcode.syntax.declaration.type"] containsObject:key])
+		else if([XcodeThemeClassKeys containsObject:key])
 		{
 			// TODO: these don't work on Zoe, but they also don't in Xcode, so
 			
 			font=self.classFont;
 			color=self.classColor;
 		}
-		else if([@[@"xcode.syntax.declaration.other",@"xcode.syntax.attribute"] containsObject:key])
+		else if([XcodeThemeFunctionKeys containsObject:key])
 		{
 			font=self.functionFont;
 			color=self.functionColor;
 		}
-		else if([@[@"xcode.syntax.keyword"] containsObject:key])
+		else if([XcodeThemeKeywordKeys containsObject:key])
 		{
 			font=self.keywordFont;
 			color=self.keywordColor;
 		}
-		else if([@[@"xcode.syntax.string"] containsObject:key])
+		else if([XcodeThemeStringKeys containsObject:key])
 		{
 			font=self.stringFont;
 			color=self.stringColor;
 		}
-		else if([@[@"xcode.syntax.number",@"xcode.syntax.character"] containsObject:key])
+		else if([XcodeThemeNumberKeys containsObject:key])
 		{
 			font=self.numberFont;
 			color=self.numberColor;
@@ -79,7 +70,7 @@
 		innerColors[key]=color;
 	}
 	
-	NSString* customPath=[NSString stringWithFormat:@"%@/Library/Developer/Xcode/UserData/FontAndColorThemes/%@.xccolortheme",NSHomeDirectory(),name];
+	NSString* customPath=[getXcodeUserThemesPath() stringByAppendingPathComponent:[name stringByAppendingString:@".xccolortheme"]];
 	[NSFileManager.defaultManager createDirectoryAtPath:customPath.stringByDeletingLastPathComponent withIntermediateDirectories:true attributes:nil error:nil];
 	
 	NSData* customData=[NSPropertyListSerialization dataWithPropertyList:custom format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];

@@ -1,23 +1,25 @@
+#define ScratchWidth 600
+#define ScratchHeight 500
+
 NSColor* (*hackRealColor)(NSObject*,SEL,NSString*,NSBundle*)=NULL;
 NSColor* hackFakeColor(NSObject* self,SEL sel,NSString* name,NSBundle* bundle)
 {
 	if([name containsString:@"_NSTabBar"])
 	{
-		NSColor* base=getXcodeThemeManager().currentPreferenceSet.sourceTextCurrentLineHighlightColor;
-		
-		if([@[@"_NSTabBarInactiveTabHoverColor",@"_NSTabBarNewTabButtonHoverColor"] containsObject:name])
+		if([@[@"_NSTabBarTabFillColorSelectedActiveWindow"] containsObject:name])
 		{
-			return base;
+			return getXcodeTheme().sourceTextBackgroundColor;
 		}
 		
-		if([@[@"_NSTabBarTabFillColorActiveWindow",@"_NSTabBarInactiveTabHoverColor",@"_NSTabBarNewTabButtonHoverColor"] containsObject:name])
+		if([@[@"_NSTabBarTabFillColorActiveWindow"] containsObject:name])
 		{
-			// TODO: completely arbitrary
-			
-			return [base colorWithAlphaComponent:0.5];
+			return getXcodeTheme().sourceTextCurrentLineHighlightColor;
 		}
 		
-		return NSColor.clearColor;
+		if([@[@"_NSTabBarInactiveTabHoverColor",@"_NSTabBarNewTabButtonHoverColor",@"_NSTabBarSemitransparentDividerColor"] containsObject:name])
+		{
+			return getXcodeTheme().sourceTextSelectionColor;
+		}
 	}
 	
 	return hackRealColor(self,sel,name,bundle);
@@ -27,36 +29,75 @@ NSColor* hackFakeColor(NSObject* self,SEL sel,NSString* name,NSBundle* bundle)
 
 +(void)initialize
 {
-	swizzle(@"NSColor",@"colorNamed:bundle:",false,(IMP)hackFakeColor,(IMP*)&hackRealColor);
+	if(@available(macOS 11,*))
+	{
+		swizzle(@"NSColor",@"colorNamed:bundle:",false,(IMP)hackFakeColor,(IMP*)&hackRealColor);
+		swizzle(@"NSTitlebarSeparatorView",@"updateLayer",true,(IMP)returnNil,NULL);
+	}
 	
 	[NSNotificationCenter.defaultCenter addObserverForName:XcodeThemeChangedKey object:nil queue:nil usingBlock:^(NSNotification* note)
 	{
-		for(Document* document in NSDocumentController.sharedDocumentController.documents)
-		{
-			for(WindowController* controller in document.windowControllers)
-			{
-				controller.syncTheme;
-			}
-		}
+		[WindowController.allInstances makeObjectsPerformSelector:@selector(syncTheme)];
 	}];
+}
+
++(NSArray<WindowController*>*)allInstances
+{
+	NSMutableArray* result=NSMutableArray.alloc.init.autorelease;
+	for(Document* document in NSDocumentController.sharedDocumentController.documents)
+	{
+		[result addObjectsFromArray:document.windowControllers];
+	}
+	return result;
+}
+
++(WindowController*)firstInstance
+{
+	return WindowController.allInstances.firstObject;
+}
+
++(WindowController*)lastInstance
+{
+	return WindowController.allInstances.lastObject;
+}
+
++(void)syncProjectMode
+{
+	NSWindow* previousKeyWindow=NSApp.keyWindow;
+	
+	WindowController* previous=nil;
+	for(WindowController* instance in WindowController.allInstances)
+	{
+		[instance syncProjectModeWithPrevious:previous];
+		previous=instance;
+	}
+	
+	if(Delegate.shared.projectMode)
+	{
+		// TODO: hack to preserve window ordering
+		// it seems key window becomes tab 1; who calls mergeAllWindows: is irrelevant
+		
+		[WindowController.firstInstance.window makeKeyAndOrderFront:nil];
+		[WindowController.firstInstance.window mergeAllWindows:nil];
+	}
+	
+	[previousKeyWindow makeKeyAndOrderFront:nil];
 }
 
 -(instancetype)initWithDocument:(Document*)document
 {
 	self=super.init;
 	
-	CGRect rect=CGRectMake(0,0,600,500);
 	NSWindowStyleMask style=NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable;
-	self.window=[NSWindow.alloc initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:false].autorelease;
-	[self.window cascadeTopLeftFromPoint:CGPointMake(INT_MAX,INT_MAX)];
-	self.window.tabbingMode=NSWindowTabbingModePreferred;
-	self.window.frameAutosaveName=getAppName();
+	self.window=[NSWindow.alloc initWithContentRect:CGRectZero styleMask:style backing:NSBackingStoreBuffered defer:false].autorelease;
 	self.window.titlebarAppearsTransparent=true;
+	self.window.delegate=Delegate.shared;
+	[self syncProjectModeWithPrevious:WindowController.lastInstance];
 	
 	self.xcodeViewController=getXcodeViewController(document.xcodeDocument);
 	self.window.contentView=self.xcodeViewController.view;
-	self.window.contentView.clipsToBounds=true;
 	focusXcodeViewController(self.xcodeViewController);
+	self.window.contentView.clipsToBounds=true;
 	
 	self.syncTheme;
 	
@@ -67,13 +108,42 @@ NSColor* hackFakeColor(NSObject* self,SEL sel,NSString* name,NSBundle* bundle)
 	return self;
 }
 
+-(void)syncProjectModeWithPrevious:(WindowController*)previous
+{
+	if(Delegate.shared.projectMode)
+	{
+		self.window.tabbingMode=NSWindowTabbingModePreferred;
+		[self.window setFrame:Settings.projectRect display:false];
+		
+		return;
+	}
+	
+	self.window.tabbingMode=NSWindowTabbingModeDisallowed;
+	[self.window moveTabToNewWindow:nil];
+	
+	// TODO: there must be a better way to get toolbar height
+	
+	CGRect defaultRect=CGRectMake(0,0,ScratchWidth,ScratchHeight);
+	[self.window setFrame:defaultRect display:false];
+	CGFloat toolbarHeight=defaultRect.size.height-self.window.contentLayoutRect.size.height;
+	
+	CGRect previousRect=previous?previous.window.frame:NSScreen.mainScreen.visibleFrame;
+	CGRect cascadedRect=defaultRect;
+	cascadedRect.origin.x=previousRect.origin.x+toolbarHeight;
+	cascadedRect.origin.y=previousRect.origin.y+previousRect.size.height-toolbarHeight-cascadedRect.size.height;
+	[self.window setFrame:cascadedRect display:false];
+	
+	if(CGRectEqualToRect(Settings.projectRect,CGRectZero))
+	{
+		Settings.projectRect=cascadedRect;
+	}
+}
+
 -(void)syncTheme
 {
 	dispatch_async(dispatch_get_main_queue(),^()
 	{
-		XcodeTheme2* theme=getXcodeThemeManager().currentPreferenceSet;
-		
-		NSAppearance* appearance=[NSAppearance appearanceNamed:theme.hasLightBackground?NSAppearanceNameAqua:NSAppearanceNameVibrantDark];
+		NSAppearance* appearance=[NSAppearance appearanceNamed:getXcodeTheme().hasLightBackground?NSAppearanceNameAqua:NSAppearanceNameVibrantDark];
 		if(@available(macOS 10.14,*))
 		{
 			NSApp.appearance=appearance;
@@ -83,7 +153,7 @@ NSColor* hackFakeColor(NSObject* self,SEL sel,NSString* name,NSBundle* bundle)
 			self.window.appearance=appearance;
 		}
 		
-		self.window.backgroundColor=theme.sourceTextBackgroundColor;
+		self.window.backgroundColor=getXcodeTheme().sourceTextBackgroundColor;
 		
 		// TODO: hack to refresh the "new tab" button
 		

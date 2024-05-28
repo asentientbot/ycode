@@ -1,10 +1,17 @@
 enum
 {
 	TagSetting=1,
-	TagTheme=2
+	TagTheme=2,
+	TagProjectMode=3,
+	TagTab=4
 };
 
 @implementation Delegate
+
++(Delegate*)shared
+{
+	return (Delegate*)NSApp.delegate;
+}
 
 -(NSMenu*)addMenuTitle:(NSString*)title to:(NSMenu*)bar
 {
@@ -101,6 +108,8 @@ enum
 	[self addItemTitle:@"Enter Full Screen" action:@"toggleFullScreen:" key:@"f" mask:NSEventModifierFlagCommand|NSEventModifierFlagControl to:viewMenu];
 	
 	NSMenu* windowMenu=[self addMenuTitle:@"Window" to:bar];
+	[self addItemTitle:@"Project Mode" action:@"amyToggleProjectMode:" key:@"p" to:windowMenu].tag=TagProjectMode;
+	[self addSeparatorTo:windowMenu];
 	[self addItemTitle:@"Minimize" action:@"performMiniaturize:" key:@"m" to:windowMenu];
 	[self addItemTitle:@"Zoom" action:@"performZoom:" key:@"" to:windowMenu];
 	[self addSeparatorTo:windowMenu];
@@ -119,7 +128,7 @@ enum
 			title=[NSString stringWithFormat:@"Show Tab %d",index];
 		}
 		NSString* key=[NSString stringWithFormat:@"%d",index];
-		[self addItemTitle:title action:@"amySelectTab:" key:key to:windowMenu];
+		[self addItemTitle:title action:@"amySelectTab:" key:key to:windowMenu].tag=TagTab;
 	}
 	
 	NSApp.mainMenu=bar;
@@ -127,14 +136,14 @@ enum
 
 -(void)amySelectTab:(NSMenuItem*)sender
 {
-	NSArray<NSWindow*>* windows=NSApp.keyWindow.tabbedWindows;
 	int value=sender.keyEquivalent.intValue;
 	if(value==9)
 	{
 		value=INT_MAX;
 	}
-	value=MIN(value,windows.count)-1;
-	[windows[value] makeKeyAndOrderFront:nil];
+
+	NSArray<NSWindow*>* windows=NSApp.keyWindow.tabbedWindows;
+	[windows[MIN(value,windows.count)-1] makeKeyAndOrderFront:nil];
 }
 
 -(void)amyAbout:(NSMenuItem*)sender
@@ -153,24 +162,32 @@ enum
 	if([item isKindOfClass:NSMenuItem.class])
 	{
 		NSMenuItem* menuItem=(NSMenuItem*)item;
+		BOOL checked=false;
+		BOOL disabled=false;
 		
 		switch(menuItem.tag)
 		{
 			case TagSetting:
 				;
 				SettingsMapping* mapping=[Settings mappingWithName:menuItem.title];
-				if(mapping.supported)
-				{
-					menuItem.state=mapping.getValue?NSControlStateValueOn:NSControlStateValueOff;
-				}
-				else
-				{
-					return false;
-				}
+				disabled=!mapping.supported;
+				checked=mapping.getValue;
 				break;
 			case TagTheme:
-				menuItem.state=[menuItem.title isEqual:Settings.currentThemeName]?NSControlStateValueOn:NSControlStateValueOff;
+				checked=[menuItem.title isEqual:Settings.currentThemeName];
 				break;
+			case TagProjectMode:
+				checked=self.projectMode;
+				break;
+			case TagTab:
+				disabled=!self.projectMode;
+				break;
+		}
+		
+		menuItem.state=checked?NSControlStateValueOn:NSControlStateValueOff;
+		if(disabled)
+		{
+			return false;
 		}
 	}
 	
@@ -179,8 +196,7 @@ enum
 
 -(void)amySettingsToggle:(NSMenuItem*)sender
 {
-	SettingsMapping* mapping=[Settings mappingWithName:sender.title];
-	[mapping setValue:sender.state!=NSControlStateValueOn];
+	[Settings mappingWithName:sender.title].toggle;
 }
 
 -(void)amySettingsReset:(NSMenuItem*)sender
@@ -191,6 +207,22 @@ enum
 -(void)amySetTheme:(NSMenuItem*)sender
 {
 	[Settings setCurrentThemeName:sender.title];
+}
+
+-(void)amyToggleProjectMode:(NSMenuItem*)sender
+{
+	self.projectMode=!self.projectMode;
+	WindowController.syncProjectMode;
+}
+
+-(void)windowDidResize:(NSNotification*)note
+{
+	if(!self.projectMode)
+	{
+		return;
+	}
+	
+	Settings.projectRect=((NSWindow*)note.object).frame;
 }
 
 @end

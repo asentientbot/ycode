@@ -46,20 +46,20 @@
 
 +(NSArray<NSString*>*)allThemeNames
 {
-	NSArray<NSString*>* names=[getXcodeThemeManager().availablePreferenceSets valueForKeyPath:@"localizedName"];
+	NSArray<NSString*>* names=[getXcodeThemes() valueForKeyPath:@"localizedName"];
 	return [names sortedArrayUsingSelector:@selector(compare:)];
 }
 
 +(NSString*)currentThemeName
 {
-	return getXcodeThemeManager().currentPreferenceSet.localizedName;
+	return getXcodeTheme().localizedName;
 }
 
 +(void)setCurrentThemeName:(NSString*)name
 {
 	XcodeTheme2* matched=nil;
 	
-	for(XcodeTheme2* theme in getXcodeThemeManager().availablePreferenceSets)
+	for(XcodeTheme2* theme in getXcodeThemes())
 	{
 		if([theme.localizedName isEqual:name])
 		{
@@ -68,12 +68,36 @@
 		}
 	}
 	
-	getXcodeThemeManager().currentPreferenceSet=matched;
-	
-	// TODO: hack to preserve when changing dark/light
-	
-	[NSUserDefaults.standardUserDefaults setObject:matched.name forKey:XcodeLightThemeKey];
-	[NSUserDefaults.standardUserDefaults setObject:matched.name forKey:XcodeDarkThemeKey];
+	setXcodeTheme(matched);
+}
+
++(void)saveRect:(CGRect)rect withPrefix:(NSString*)prefix
+{
+	NSUserDefaults* defaults=NSUserDefaults.standardUserDefaults;
+	[defaults setDouble:rect.origin.x forKey:[prefix stringByAppendingString:@".x"]];
+	[defaults setDouble:rect.origin.y forKey:[prefix stringByAppendingString:@".y"]];
+	[defaults setDouble:rect.size.width forKey:[prefix stringByAppendingString:@".width"]];
+	[defaults setDouble:rect.size.height forKey:[prefix stringByAppendingString:@".height"]];
+}
+
++(CGRect)rectWithPrefix:(NSString*)prefix
+{
+	NSUserDefaults* defaults=NSUserDefaults.standardUserDefaults;
+	CGFloat x=[defaults doubleForKey:[prefix stringByAppendingString:@".x"]];
+	CGFloat y=[defaults doubleForKey:[prefix stringByAppendingString:@".y"]];
+	CGFloat width=[defaults doubleForKey:[prefix stringByAppendingString:@".width"]];
+	CGFloat height=[defaults doubleForKey:[prefix stringByAppendingString:@".height"]];
+	return CGRectMake(x,y,width,height);
+}
+
++(void)setProjectRect:(CGRect)rect
+{
+	[Settings saveRect:rect withPrefix:@"project"];
+}
+
++(CGRect)projectRect
+{
+	return [Settings rectWithPrefix:@"project"];
 }
 
 +(void)reset
@@ -83,26 +107,19 @@
 		mapping.reset;
 	}
 	
-	Settings.setSampleTheme;
-}
-
-+(void)setSampleTheme
-{
 	ThemeMapping* theme=ThemeMapping.alloc.init.autorelease;
 	
 	NSString* regular=@"SFMono-Regular - 13.0";
-	NSString* italic=@"SFMono-LightItalic - 13.0";
+	NSString* italic=@"SFMono-RegularItalic - 13.0";
 	NSString* bold=@"SFMono-Bold - 13.0";
 	
 	theme.defaultFont=regular;
 	theme.defaultColor=@"0.3 0.3 0.6 1";
-	
-	theme.backgroundColor=@"1 0.95 1 1";
-	theme.highlightColor=@"1 0.9 1 1";
-	theme.selectionColor=@"1 0.8 1 1";
-	
+	theme.backgroundColor=@"1 0.9 1 1";
+	theme.highlightColor=@"1 0.85 1 1";
+	theme.selectionColor=@"1 0.75 1 1";
 	theme.commentFont=italic;
-	theme.commentColor=@"0.4 0.4 0.8 1";
+	theme.commentColor=@"0.6 0.5 0.8 1";
 	theme.preprocessorFont=regular;
 	theme.preprocessorColor=theme.commentColor;
 	theme.classFont=bold;

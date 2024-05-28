@@ -1,11 +1,17 @@
-// TODO: configurable?
-
-NSString* xcodePath=@"/Applications/Xcode.app";
-NSString* xcodePathPlaceholder=@"%";
+NSString* xcodePath=nil;
 
 NSString* replaceXcodePath(NSString* path)
 {
-	return [path stringByReplacingOccurrencesOfString:xcodePathPlaceholder withString:xcodePath];
+	if(!xcodePath)
+	{
+		xcodePath=[NSWorkspace.sharedWorkspace URLForApplicationWithBundleIdentifier:@"com.apple.dt.Xcode"].path;
+		if(!xcodePath)
+		{
+			alertAbort(@"xcode missing");
+		}
+	}
+	
+	return [path stringByReplacingOccurrencesOfString:@"%" withString:xcodePath];
 }
 
 void (*SoftInitialize)(int,NSError**);
@@ -48,9 +54,21 @@ Class SoftDocumentLocation;
 
 @class XcodeThemeManager;
 
-#define XcodeLightThemeKey @"XCFontAndColorCurrentTheme"
-#define XcodeDarkThemeKey @"XCFontAndColorCurrentDarkTheme"
-#define XcodeThemeChangedKey @"DVTFontAndColorSettingsChangedNotification"
+#define XcodeThemeBackgroundKey @"DVTSourceTextBackground"
+#define XcodeThemeHighlightKey @"DVTSourceTextCurrentLineHighlightColor"
+#define XcodeThemeSelectionKey @"DVTSourceTextSelectionColor"
+#define XcodeThemeCursorKey @"DVTSourceTextInsertionPointColor"
+#define XcodeThemeInvisiblesKey @"DVTSourceTextInvisiblesColor"
+
+#define XcodeThemeFontsKey @"DVTSourceTextSyntaxFonts"
+#define XcodeThemeColorsKey @"DVTSourceTextSyntaxColors"
+#define XcodeThemeCommentKeys @[@"xcode.syntax.comment",@"xcode.syntax.comment.doc",@"xcode.syntax.comment.doc.keyword",@"xcode.syntax.mark",@"xcode.syntax.url"]
+#define XcodeThemePreprocessorKeys @[@"xcode.syntax.preprocessor"]
+#define XcodeThemeClassKeys @[@"xcode.syntax.declaration.type"]
+#define XcodeThemeFunctionKeys @[@"xcode.syntax.declaration.other",@"xcode.syntax.attribute"]
+#define XcodeThemeKeywordKeys @[@"xcode.syntax.keyword"]
+#define XcodeThemeStringKeys @[@"xcode.syntax.string"]
+#define XcodeThemeNumberKeys @[@"xcode.syntax.number",@"xcode.syntax.character"]
 
 @interface XcodeTheme2:NSObject
 
@@ -60,8 +78,13 @@ Class SoftDocumentLocation;
 -(BOOL)hasLightBackground;
 -(NSColor*)sourceTextBackgroundColor;
 -(NSColor*)sourceTextCurrentLineHighlightColor;
+-(NSColor*)sourceTextSelectionColor;
 
 @end
+
+#define XcodeLightThemeKey @"XCFontAndColorCurrentTheme"
+#define XcodeDarkThemeKey @"XCFontAndColorCurrentDarkTheme"
+#define XcodeThemeChangedKey @"DVTFontAndColorSettingsChangedNotification"
 
 @interface XcodeThemeManager:NSObject
 
@@ -76,31 +99,13 @@ XcodeDocument* getXcodeDocument(NSURL* url,NSString* type)
 	return [(XcodeDocument*)[SoftDocument alloc] initWithContentsOfURL:url ofType:type error:nil].autorelease;
 }
 
-// TODO: uhh
-
-@interface HackExtension:NSObject
-@end
-
-@implementation HackExtension
-
--(NSString*)identifier
-{
-	return @"";
-}
-
-@end
-
 XcodeViewController* getXcodeViewController(XcodeDocument* document)
 {
 	XcodeViewController* controller=[(XcodeViewController*)[SoftViewController alloc] initWithNibName:nil bundle:nil document:document].autorelease;
-	
-	controller.representedExtension=HackExtension.alloc.init.autorelease;
 	controller.fileTextSettings=((NSObject*)[SoftSettings2 alloc]).init.autorelease;
 	
 	return controller;
 }
-
-// TODO: weird to separate from above, but asserts view loaded..
 
 void focusXcodeViewController(XcodeViewController* controller)
 {
@@ -119,9 +124,41 @@ XcodeThemeManager* getXcodeThemeManager()
 	return [SoftTheme2 preferenceSetsManager];
 }
 
-id hackReturnNil()
+NSArray<XcodeTheme2*>* getXcodeThemes()
 {
-	return nil;
+	return getXcodeThemeManager().availablePreferenceSets;
+}
+
+XcodeTheme2* getXcodeTheme()
+{
+	return getXcodeThemeManager().currentPreferenceSet;
+}
+
+void setXcodeTheme(XcodeTheme2* theme)
+{
+	getXcodeThemeManager().currentPreferenceSet=theme;
+	
+	[NSUserDefaults.standardUserDefaults setObject:theme.name forKey:XcodeLightThemeKey];
+	[NSUserDefaults.standardUserDefaults setObject:theme.name forKey:XcodeDarkThemeKey];
+}
+
+NSString* getXcodeSystemThemesPath()
+{
+	for(NSString* format in @[@"%/Contents/SharedFrameworks/DVTUserInterfaceKit.framework/Versions/A/Resources/FontAndColorThemes",@"%/Contents/SharedFrameworks/DVTKit.framework/Versions/A/Resources/FontAndColorThemes"])
+	{
+		NSString* path=replaceXcodePath(format);
+		if([NSFileManager.defaultManager fileExistsAtPath:path])
+		{
+			return path;
+		}
+	}
+	
+	alertAbort(@"system themes folder missing");
+}
+
+NSString* getXcodeUserThemesPath()
+{
+	return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Developer/Xcode/UserData/FontAndColorThemes"];
 }
 
 NSMenu* (^contextMenuHook)()=NULL;
@@ -130,48 +167,62 @@ NSMenu* hackContextMenu()
 	return contextMenuHook();
 }
 
+void linkLibrary(NSString* path)
+{
+	if(!dlopen(path.UTF8String,RTLD_LAZY))
+	{
+		alertAbort([NSString stringWithFormat:@"dlopen failed: %s",dlerror()]);
+	}
+}
+
+void linkSymbol(NSString* name,void** pointer)
+{
+	void* symbol=dlsym(RTLD_DEFAULT,name.UTF8String);
+	if(!symbol)
+	{
+		alertAbort([NSString stringWithFormat:@"dlsym failed: %s",dlerror()]);
+	}
+	*pointer=symbol;
+}
+
+void linkClass(NSString* name,Class* pointer)
+{
+	linkSymbol([NSString stringWithFormat:@"OBJC_CLASS_$_%@",name],(void**)pointer);
+}
+
 void linkXcode()
 {
-	NSString* dylibPath=replaceXcodePath(@"%/Contents/PlugIns/IDESourceEditor.framework/Versions/A/IDESourceEditor");
-	if(!dlopen(dylibPath.UTF8String,RTLD_LAZY))
-	{
-		alertAbort([NSString stringWithFormat:@"dlopen failed %s",dlerror()]);
-	}
+	linkLibrary(replaceXcodePath(@"%/Contents/PlugIns/IDESourceEditor.framework/Versions/A/IDESourceEditor"));
 	
-	SoftInitialize=dlsym(RTLD_DEFAULT,"IDEInitialize");
-	SoftDocument=NSClassFromString(@"_TtC15IDESourceEditor18SourceCodeDocument");
-	SoftViewController=NSClassFromString(@"_TtC15IDESourceEditor16SourceCodeEditor");
-	SoftTheme=NSClassFromString(@"DVTTheme");
-	SoftTheme2=NSClassFromString(@"DVTFontAndColorTheme");
-	SoftSettings=NSClassFromString(@"DVTTextPreferences");
-	SoftSettings2=NSClassFromString(@"IDEFileTextSettings");
-	SoftDocumentLocation=NSClassFromString(@"DVTTextDocumentLocation");
-	if(!(SoftInitialize&&SoftDocument&&SoftViewController&&SoftTheme&&SoftTheme2&&SoftSettings&&SoftSettings2&&SoftDocumentLocation))
-	{
-		alertAbort(@"symbol missing");
-	}
+	linkSymbol(@"IDEInitialize",(void**)&SoftInitialize);
+	linkClass(@"_TtC15IDESourceEditor18SourceCodeDocument",&SoftDocument);
+	linkClass(@"_TtC15IDESourceEditor16SourceCodeEditor",&SoftViewController);
+	linkClass(@"DVTTheme",&SoftTheme);
+	linkClass(@"DVTFontAndColorTheme",&SoftTheme2);
+	linkClass(@"DVTTextPreferences",&SoftSettings);
+	linkClass(@"IDEFileTextSettings",&SoftSettings2);
+	linkClass(@"DVTTextDocumentLocation",&SoftDocumentLocation);
 	
 	// TODO: stupid
 	
-	swizzle(@"IDEDocumentController",@"sharedDocumentController",false,(IMP)hackReturnNil,NULL);
+	swizzle(@"IDEDocumentController",@"sharedDocumentController",false,(IMP)returnNil,NULL);
+	swizzle(@"_TtC12SourceEditor16SourceEditorView",@"menuForEvent:",true,(IMP)hackContextMenu,NULL);
 	
 	NSError* error=nil;
-	SoftInitialize(2,&error);
+	SoftInitialize(0,&error);
 	if(error)
 	{
-		alertAbort(@"xcode init failed");
+		alertAbort([NSString stringWithFormat:@"xcode init failed: %@",error]);
 	}
 	
+	// TODO: is there a more normal way to call this?
+	
 	[SoftTheme initialize];
-	
-	// TODO: even stupider
-	
-	swizzle(@"_TtC12SourceEditor16SourceEditorView",@"menuForEvent:",true,(IMP)hackContextMenu,NULL);
 }
 
 void restartIfNeeded(char** argv)
 {
-	// TODO: case where it's already set?
+	// TODO: case where it's already set? maybe we should instead check if IDESourceEditor fails to load?
 	
 	if(!getenv("DYLD_FRAMEWORK_PATH"))
 	{

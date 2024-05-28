@@ -24,7 +24,7 @@ __attribute__((noreturn)) void alertAbort(NSString* message)
 {
 	alert([NSString stringWithFormat:@"fatal: %@",message]);
     trace(@"%@ %@",message,NSThread.callStackSymbols);
-	abort();
+	exit(1);
 }
 
 void swizzle(NSString* className,NSString* selName,BOOL isInstance,IMP newImp,IMP* oldImpOut)
@@ -47,4 +47,9 @@ void swizzle(NSString* className,NSString* selName,BOOL isInstance,IMP newImp,IM
 	{
 		*oldImpOut=oldImp;
 	}
+}
+
+id returnNil()
+{
+	return nil;
 }

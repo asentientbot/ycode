@@ -34,7 +34,7 @@
 {
 	BOOL result=[self.xcodeDocument writeSafelyToURL:url ofType:type forSaveOperation:NSSaveToOperation error:error];
 	
-	// TODO: stupid
+	// TODO: stupid way to refresh filetype
 	
 	if(!self.fileURL)
 	{

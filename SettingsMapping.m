@@ -45,10 +45,12 @@
 
 -(void)reset
 {
-	if(self.supported)
-	{
-		[self setValue:self.defaultValue];
-	}
+	[self setValue:self.defaultValue];
+}
+
+-(void)toggle
+{
+	[self setValue:!self.getValue];
 }
 
 @end

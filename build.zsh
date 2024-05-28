@@ -7,6 +7,12 @@ class=Document
 type=public.data
 minVersion=10.13
 
+if [[ $1 == test ]]
+then
+	name+=' (Test Build)'
+	id+=-test
+fi
+
 rm -rf "$name.app" "$name.zip"
 mkdir -p "$name.app/Contents/MacOS"
 mkdir -p "$name.app/Contents/Resources"
@@ -41,8 +47,16 @@ done
 codesign -f -s - "$name.app"
 zip -r "$name.zip" "$name.app"
 
-set +e
 rm -rf icon icon.png icon.iconset
+
+if [[ $1 != test ]]
+then
+	exit
+fi
+
+set +e
+
 defaults delete $id
 rm ~/"Library/Developer/Xcode/UserData/FontAndColorThemes/$name.xccolortheme"
+
 "./$name.app/Contents/MacOS/$name"

@@ -218,6 +218,9 @@ void linkXcode()
 	// TODO: is there a more normal way to call this?
 	
 	[SoftTheme initialize];
+	
+	// TODO: still missing xcode indexing-based colors
+	// TODO: source control sidebar?
 }
 
 void restartIfNeeded(char** argv)

@@ -1,10 +1,8 @@
+// TODO: lol
+
 @import AppKit;
 @import Darwin;
 @import ObjectiveC;
-@import MachO;
-#define trace NSLog
-
-// TODO: lol
 
 #import "Utils.m"
 #import "Xcode.m"

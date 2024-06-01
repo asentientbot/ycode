@@ -1,3 +1,5 @@
+#define trace NSLog
+
 #define stringify2(macro) #macro
 #define stringify(macro) stringify2(macro)
 
@@ -53,3 +55,11 @@ id returnNil()
 {
 	return nil;
 }
+
+// TODO: hack to compile on older macOS (10.9+ but not in headers..?)
+
+@interface NSView ()
+
+@property(assign) BOOL clipsToBounds;
+
+@end

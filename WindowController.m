@@ -121,16 +121,9 @@ NSColor* hackFakeColor(NSObject* self,SEL sel,NSString* name,NSBundle* bundle)
 	self.window.tabbingMode=NSWindowTabbingModeDisallowed;
 	[self.window moveTabToNewWindow:nil];
 	
-	// TODO: there must be a better way to get toolbar height
-	
-	CGRect defaultRect=CGRectMake(0,0,ScratchWidth,ScratchHeight);
-	[self.window setFrame:defaultRect display:false];
-	CGFloat toolbarHeight=defaultRect.size.height-self.window.contentLayoutRect.size.height;
-	
 	CGRect previousRect=previous?previous.window.frame:NSScreen.mainScreen.visibleFrame;
-	CGRect cascadedRect=defaultRect;
-	cascadedRect.origin.x=previousRect.origin.x+toolbarHeight;
-	cascadedRect.origin.y=previousRect.origin.y+previousRect.size.height-toolbarHeight-cascadedRect.size.height;
+	CGFloat toolbarHeight=[self.window frameRectForContentRect:CGRectZero].size.height;
+	CGRect cascadedRect=CGRectMake(previousRect.origin.x+toolbarHeight,previousRect.origin.y+previousRect.size.height-ScratchHeight-toolbarHeight,ScratchWidth,ScratchHeight);
 	[self.window setFrame:cascadedRect display:false];
 	
 	if(CGRectEqualToRect(Settings.projectRect,CGRectZero))

@@ -215,14 +215,24 @@ enum
 	WindowController.syncProjectMode;
 }
 
--(void)windowDidResize:(NSNotification*)note
+-(void)handleFrameChange:(NSWindow*)window
 {
 	if(!self.projectMode)
 	{
 		return;
 	}
 	
-	Settings.projectRect=((NSWindow*)note.object).frame;
+	Settings.projectRect=window.frame;
+}
+
+-(void)windowDidResize:(NSNotification*)note
+{
+	[self handleFrameChange:(NSWindow*)note.object];
+}
+
+-(void)windowDidMove:(NSNotification*)note
+{
+	[self handleFrameChange:(NSWindow*)note.object];
 }
 
 @end

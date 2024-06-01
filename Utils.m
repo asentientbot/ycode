@@ -60,6 +60,6 @@ id returnNil()
 
 @interface NSView ()
 
-@property(assign) BOOL clipsToBounds;
+-(void)setClipsToBounds:(BOOL)value;
 
 @end

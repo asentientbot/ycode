@@ -3,7 +3,8 @@ enum
 	TagSetting=1,
 	TagTheme=2,
 	TagProjectMode=3,
-	TagTab=4
+	TagTab=4,
+	TagFileAssociation=5
 };
 
 @implementation Delegate
@@ -81,6 +82,8 @@ enum
 	[self addItemTitle:@"Close" action:@"performClose:" key:@"w" to:fileMenu];
 	[self addSeparatorTo:fileMenu];
 	[self addItemTitle:@"Save" action:@"amySave:" key:@"s" to:fileMenu];
+	[self addSeparatorTo:fileMenu];
+	[self addItemTitle:@"" action:@"amyClaimFileAssociation:" key:@"" to:fileMenu].tag=TagFileAssociation;
 	
 	NSMenu* editMenu=[self addMenuTitle:@"Edit" to:bar];
 	[self addItemTitle:@"Undo" action:@"undo:" key:@"z" to:editMenu];
@@ -134,29 +137,6 @@ enum
 	NSApp.mainMenu=bar;
 }
 
--(void)amySelectTab:(NSMenuItem*)sender
-{
-	int value=sender.keyEquivalent.intValue;
-	if(value==9)
-	{
-		value=INT_MAX;
-	}
-
-	NSArray<NSWindow*>* windows=NSApp.keyWindow.tabbedWindows;
-	[windows[MIN(value,windows.count)-1] makeKeyAndOrderFront:nil];
-}
-
--(void)amyAbout:(NSMenuItem*)sender
-{
-	NSString* gitInfo=[NSString stringWithUTF8String:stringify(gitHash)];
-	if(gitInfo.length==0)
-	{
-		gitInfo=@"[unknown Git commit]";
-	}
-	
-	alert([NSString stringWithFormat:@"Amy's meme text editor\n\n%@\n\ndo not actually use this",gitInfo]);
-}
-
 -(BOOL)validateUserInterfaceItem:(NSObject<NSValidatedUserInterfaceItem>*)item
 {
 	if([item isKindOfClass:NSMenuItem.class])
@@ -182,6 +162,24 @@ enum
 			case TagTab:
 				disabled=!self.projectMode;
 				break;
+			case TagFileAssociation:
+				;
+				Document* document=NSApp.keyWindow.windowController.document;
+				if(document)
+				{
+					menuItem.title=[NSString stringWithFormat:@"Claim File Type (%@)",document.fileType];
+					NSString* existing=((NSString*)LSCopyDefaultRoleHandlerForContentType((CFStringRef)document.fileType,kLSRolesAll)).autorelease;
+					if([existing isEqual:NSBundle.mainBundle.bundleIdentifier])
+					{
+						disabled=true;
+					}
+				}
+				else
+				{
+					menuItem.title=@"Claim File Type";
+					disabled=true;
+				}
+				break;
 		}
 		
 		menuItem.state=checked?NSControlStateValueOn:NSControlStateValueOff;
@@ -191,7 +189,30 @@ enum
 		}
 	}
 	
-	return [self respondsToSelector:item.action];
+	return true;
+}
+
+-(void)amySelectTab:(NSMenuItem*)sender
+{
+	int value=sender.keyEquivalent.intValue;
+	if(value==9)
+	{
+		value=INT_MAX;
+	}
+
+	NSArray<NSWindow*>* windows=NSApp.keyWindow.tabbedWindows;
+	[windows[MIN(value,windows.count)-1] makeKeyAndOrderFront:nil];
+}
+
+-(void)amyAbout:(NSMenuItem*)sender
+{
+	NSString* gitInfo=[NSString stringWithUTF8String:stringify(gitHash)];
+	if(gitInfo.length==0)
+	{
+		gitInfo=@"[unknown Git commit]";
+	}
+	
+	alert([NSString stringWithFormat:@"Amy's meme text editor\n\n%@\n\ndo not actually use this",gitInfo]);
 }
 
 -(void)amySettingsToggle:(NSMenuItem*)sender
@@ -213,6 +234,12 @@ enum
 {
 	self.projectMode=!self.projectMode;
 	WindowController.syncProjectMode;
+}
+
+-(void)amyClaimFileAssociation:(NSMenuItem*)sender
+{
+	Document* document=NSApp.keyWindow.windowController.document;
+	LSSetDefaultRoleHandlerForContentType((CFStringRef)document.fileType,kLSRolesAll,(CFStringRef)NSBundle.mainBundle.bundleIdentifier);
 }
 
 -(void)handleFrameChange:(NSWindow*)window

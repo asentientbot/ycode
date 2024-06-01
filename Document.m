@@ -50,7 +50,7 @@
 	return result;
 }
 
--(void)amySave:(id)sender
+-(void)amySave:(NSMenuItem*)sender
 {
 	[self saveDocument:nil];
 }

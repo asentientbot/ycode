@@ -17,7 +17,7 @@ rm -rf "$name.app" "$name.zip"
 mkdir -p "$name.app/Contents/MacOS"
 mkdir -p "$name.app/Contents/Resources"
 
-clang -fmodules -Wno-unused-getter-return-value -Wno-objc-missing-super-calls -mmacosx-version-min=$minVersion -DgitHash=$(git log -1 --format=%H) main.m -o "$name.app/Contents/MacOS/$name"
+clang -fmodules -Wno-unused-getter-return-value -Wno-objc-missing-super-calls -mmacosx-version-min=$minVersion -arch x86_64 -arch arm64 -DgitHash=$(git log -1 --format=%H) main.m -o "$name.app/Contents/MacOS/$name"
 
 clang -fmodules -Wno-deprecated-declarations icon.m -o icon
 ./icon

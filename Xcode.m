@@ -208,6 +208,8 @@ void linkXcode()
 	swizzle(@"IDEDocumentController",@"sharedDocumentController",false,(IMP)returnNil,NULL);
 	swizzle(@"_TtC12SourceEditor16SourceEditorView",@"menuForEvent:",true,(IMP)hackContextMenu,NULL);
 	
+	// TODO: aborts if Xcode present but never opened
+	
 	NSError* error=nil;
 	SoftInitialize(0,&error);
 	if(error)

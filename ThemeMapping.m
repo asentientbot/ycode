@@ -40,8 +40,6 @@
 		}
 		else if([XcodeThemeClassKeys containsObject:key])
 		{
-			// TODO: these don't work on Zoe, but they also don't in Xcode, so
-			
 			font=self.classFont;
 			color=self.classColor;
 		}
@@ -67,7 +65,7 @@
 		}
 		
 		innerFonts[key]=font;
-		innerColors[key]=color;
+		innerColors[key]=[color stringByAppendingString:@" 1"];
 	}
 	
 	NSString* customPath=[getXcodeUserThemesPath() stringByAppendingPathComponent:[name stringByAppendingString:@".xccolortheme"]];

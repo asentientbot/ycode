@@ -209,10 +209,10 @@ enum
 	NSString* gitInfo=[NSString stringWithUTF8String:stringify(gitHash)];
 	if(gitInfo.length==0)
 	{
-		gitInfo=@"[unknown Git commit]";
+		gitInfo=@"[unknown commit]";
 	}
 	
-	alert([NSString stringWithFormat:@"Amy's meme text editor\n\n%@\n\ndo not actually use this",gitInfo]);
+	alert([NSString stringWithFormat:@"Amy's meme text editor\n\n%@",gitInfo]);
 }
 
 -(void)amySettingsToggle:(NSMenuItem*)sender
@@ -261,5 +261,7 @@ enum
 {
 	[self handleFrameChange:(NSWindow*)note.object];
 }
+
+// TODO: how do TextEdit, Xcode, etc. automatically hide the Dock icon when nothing is open?
 
 @end

@@ -2,10 +2,16 @@
 
 -(void)makeWindowControllers
 {
+	[self addWindowController:WindowController.alloc.init.autorelease];
+	[self loadWithURL:self.fileURL type:self.fileType];
+}
+
+-(void)loadWithURL:(NSURL*)url type:(NSString*)type
+{
 	NSURL* tempURL=getTempURL();
-	if(self.fileURL)
+	if(url)
 	{
-		if(![NSFileManager.defaultManager copyItemAtURL:self.fileURL toURL:tempURL error:nil])
+		if(![NSFileManager.defaultManager copyItemAtURL:url toURL:tempURL error:nil])
 		{
 			alertAbort(@"copy error");
 		}
@@ -18,11 +24,10 @@
 		}
 	}
 	
-	self.xcodeDocument=getXcodeDocument(tempURL,self.fileType);
+	self.xcodeDocument=getXcodeDocument(tempURL,type);
 	self.undoManager=self.xcodeDocument.undoManager;
 	
-	WindowController* controller=[WindowController.alloc initWithDocument:self].autorelease;
-	[self addWindowController:controller];
+	[(WindowController*)self.windowControllers.lastObject replaceDocument:self];
 }
 
 -(BOOL)readFromURL:(NSURL*)url ofType:(NSString*)type error:(NSError**)error
@@ -34,17 +39,13 @@
 {
 	BOOL result=[self.xcodeDocument writeSafelyToURL:url ofType:type forSaveOperation:NSSaveToOperation error:error];
 	
-	// TODO: stupid way to refresh filetype
-	
 	if(!self.fileURL)
 	{
-		dispatch_async(dispatch_get_main_queue(),^()
-		{
-			self.close;
-			[NSDocumentController.sharedDocumentController openDocumentWithContentsOfURL:url display:true completionHandler:^(NSDocument* document,BOOL alreadyOpen,NSError* error)
-			{
-			}];
-		});
+		// TODO: a tiny bit weird. maybe we can skip this by moving a bit "later" in the save process.
+		// also, we should be able to do TextEdit-style "transient" untitled documents now
+		
+		NSString* newType=[NSDocumentController.sharedDocumentController typeForContentsOfURL:url error:nil];
+		[self loadWithURL:url type:newType];
 	}
 	
 	return result;

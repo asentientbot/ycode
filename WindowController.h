@@ -2,6 +2,6 @@
 
 @property(retain) XcodeViewController* xcodeViewController;
 
--(instancetype)initWithDocument:(Document*)document;
+-(void)replaceDocument:(Document*)document;
 
 @end

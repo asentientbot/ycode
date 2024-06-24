@@ -100,13 +100,13 @@
 	return [Settings rectWithPrefix:@"project"];
 }
 
-+(void)reset
++(NSString*)themeNameWithSuffix:(NSString*)suffix
 {
-	for(SettingsMapping* mapping in Settings.allMappings)
-	{
-		mapping.reset;
-	}
-	
+	return [NSString stringWithFormat:@"%@ %@",getAppName(),suffix];
+}
+
++(void)saveThemeWithSuffix:(NSString*)suffix background:(NSString*)backgroundColor highlight:(NSString*)highlightColor selection:(NSString*)selectionColor normal:(NSString*)normalColor meta:(NSString*)metaColor type:(NSString*)typeColor keyword:(NSString*)keywordColor string:(NSString*)stringColor number:(NSString*)numberColor
+{
 	ThemeMapping* theme=ThemeMapping.alloc.init.autorelease;
 	
 	NSString* regular=@"SFMono-Regular - 13.0";
@@ -114,27 +114,40 @@
 	NSString* bold=@"SFMono-Bold - 13.0";
 	
 	theme.defaultFont=regular;
-	theme.defaultColor=@"0.3 0.3 0.6 1";
-	theme.backgroundColor=@"1 0.9 1 1";
-	theme.highlightColor=@"1 0.85 1 1";
-	theme.selectionColor=@"1 0.75 1 1";
+	theme.defaultColor=normalColor;
+	theme.backgroundColor=backgroundColor;
+	theme.highlightColor=highlightColor;
+	theme.selectionColor=selectionColor;
 	theme.commentFont=italic;
-	theme.commentColor=@"0.6 0.5 0.8 1";
+	theme.commentColor=metaColor;
 	theme.preprocessorFont=regular;
-	theme.preprocessorColor=theme.commentColor;
+	theme.preprocessorColor=metaColor;
 	theme.classFont=bold;
-	theme.classColor=@"0 0.5 0.4 1";
+	theme.classColor=typeColor;
 	theme.functionFont=regular;
-	theme.functionColor=theme.classColor;
+	theme.functionColor=typeColor;
 	theme.keywordFont=bold;
-	theme.keywordColor=@"0.8 0 1 1";
+	theme.keywordColor=keywordColor;
 	theme.stringFont=bold;
-	theme.stringColor=@"0.85 0.5 0.8 1";
+	theme.stringColor=stringColor;
 	theme.numberFont=bold;
-	theme.numberColor=@"0.3 0.6 1 1";
+	theme.numberColor=numberColor;
 	
-	[theme saveWithName:getAppName()];
-	[Settings setCurrentThemeName:getAppName()];
+	[theme saveWithName:[Settings themeNameWithSuffix:suffix]];
+}
+
++(void)reset
+{
+	for(SettingsMapping* mapping in Settings.allMappings)
+	{
+		mapping.reset;
+	}
+	
+	[Settings saveThemeWithSuffix:@"Old" background:@"1 0.9 1" highlight:@"1 0.85 1" selection:@"1 0.75 1" normal:@"0.3 0.3 0.6" meta:@"0.6 0.5 0.8" type:@"0 0.5 0.4" keyword:@"0.8 0 1" string:@"0.85 0.5 0.8" number:@"0.3 0.6 1"];
+	[Settings saveThemeWithSuffix:@"Pink (Light)" background:@"1 0.75 1" highlight:@"1 0.7 1" selection:@"1 0.6 1" normal:@"0.3 0.2 0.5" meta:@"0.5 0.4 0.7" type:@"0.6 0.2 0.8" keyword:@"0.7 0.2 0.6" string:@"0.8 0.4 0.8" number:@"0.5 0.3 0.9"];
+	[Settings saveThemeWithSuffix:@"Pink (Dark)" background:@"0.1 0 0.1" highlight:@"0.15 0 0.15" selection:@"0.25 0 0.25" normal:@"0.5 0.4 0.5" meta:@"0.3 0.2 0.3" type:@"0.5 0.2 0.6" keyword:@"0.5 0.1 0.3" string:@"0.5 0.2 0.4" number:@"0.3 0.2 0.5"];
+	
+	[Settings setCurrentThemeName:[Settings themeNameWithSuffix:@"Pink (Light)"]];
 }
 
 @end

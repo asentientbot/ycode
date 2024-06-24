@@ -25,6 +25,21 @@ NSColor* hackFakeColor(NSObject* self,SEL sel,NSString* name,NSBundle* bundle)
 	return hackRealColor(self,sel,name,bundle);
 }
 
+NSColor* hackFakeShadow()
+{
+	return NSColor.clearColor;
+}
+
+void (*hackRealHeaderLayout)(NSView*,SEL);
+void hackFakeHeaderLayout(NSView* self,SEL sel)
+{
+	hackRealHeaderLayout(self,sel);
+	
+	NSView* container=self.superview.superview;
+	container.subviews[0].hidden=true;
+	container.layer.backgroundColor=getXcodeTheme().sourceTextBackgroundColor.CGColor;
+}
+
 @implementation WindowController
 
 +(void)initialize
@@ -33,6 +48,16 @@ NSColor* hackFakeColor(NSObject* self,SEL sel,NSString* name,NSBundle* bundle)
 	{
 		swizzle(@"NSColor",@"colorNamed:bundle:",false,(IMP)hackFakeColor,(IMP*)&hackRealColor);
 		swizzle(@"NSTitlebarSeparatorView",@"updateLayer",true,(IMP)returnNil,NULL);
+	}
+	
+	// TODO: uhh
+	
+	if(NSClassFromString(@"_TtC12SourceEditor16StickyHeaderView"))
+	{
+		swizzle(@"_TtC12SourceEditor16StickyHeaderView",@"layout",true,(IMP)hackFakeHeaderLayout,(IMP*)&hackRealHeaderLayout);
+	
+		swizzle(@"NSColor",@"shadowWithLevel:",true,(IMP)hackFakeShadow,NULL);
+		swizzle(@"NSColor",@"highlightWithLevel:",true,(IMP)hackFakeShadow,NULL);
 	}
 	
 	[NSNotificationCenter.defaultCenter addObserverForName:XcodeThemeChangedKey object:nil queue:nil usingBlock:^(NSNotification* note)
@@ -84,7 +109,7 @@ NSColor* hackFakeColor(NSObject* self,SEL sel,NSString* name,NSBundle* bundle)
 	[previousKeyWindow makeKeyAndOrderFront:nil];
 }
 
--(instancetype)initWithDocument:(Document*)document
+-(instancetype)init
 {
 	self=super.init;
 	
@@ -94,18 +119,19 @@ NSColor* hackFakeColor(NSObject* self,SEL sel,NSString* name,NSBundle* bundle)
 	self.window.delegate=Delegate.shared;
 	[self syncProjectModeWithPrevious:WindowController.lastInstance];
 	
-	self.xcodeViewController=getXcodeViewController(document.xcodeDocument);
-	self.window.contentView=self.xcodeViewController.view;
-	focusXcodeViewController(self.xcodeViewController);
-	self.window.contentView.clipsToBounds=true;
-	
 	self.syncTheme;
 	
-	// TODO: make toggle-able? dependent on minimap?
-	
-	self.xcodeViewController.mainScrollView.hasVerticalScroller=false;
-	
 	return self;
+}
+
+-(void)replaceDocument:(Document*)document
+{
+	NSRange oldSelection=getXcodeViewControllerSelection(self.xcodeViewController);
+	
+	self.xcodeViewController=getXcodeViewController(document.xcodeDocument);
+	self.window.contentView=self.xcodeViewController.view;
+	
+	focusXcodeViewController(self.xcodeViewController,oldSelection);
 }
 
 -(void)syncProjectModeWithPrevious:(WindowController*)previous

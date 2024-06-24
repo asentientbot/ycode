@@ -58,7 +58,7 @@ id returnNil()
 
 // TODO: hack to compile on older macOS (10.9+ but not in headers..?)
 
-@interface NSView ()
+@interface NSView()
 
 -(void)setClipsToBounds:(BOOL)value;
 

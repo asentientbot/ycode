@@ -32,6 +32,7 @@ Class SoftDocumentLocation;
 @interface XcodeDocumentLocation:NSObject
 
 -(instancetype)initWithDocumentURL:(NSURL*)url timestamp:(NSNumber*)timestamp characterRange:(NSRange)range;
+-(NSRange)characterRange;
 
 @end
 
@@ -42,7 +43,7 @@ Class SoftDocumentLocation;
 
 -(instancetype)initWithNibName:(NSString*)nib bundle:(NSBundle*)bundle document:(NSDocument*)document;
 -(void)selectDocumentLocations:(NSArray<XcodeDocumentLocation*>*)locations;
--(NSScrollView*)mainScrollView;
+-(NSArray<XcodeDocumentLocation*>*)currentSelectedDocumentLocations;
 
 @end
 
@@ -103,15 +104,34 @@ XcodeViewController* getXcodeViewController(XcodeDocument* document)
 {
 	XcodeViewController* controller=[(XcodeViewController*)[SoftViewController alloc] initWithNibName:nil bundle:nil document:document].autorelease;
 	controller.fileTextSettings=((NSObject*)[SoftSettings2 alloc]).init.autorelease;
-	
+	controller.view.clipsToBounds=true;
 	return controller;
 }
 
-void focusXcodeViewController(XcodeViewController* controller)
+NSRange getXcodeViewControllerSelection(XcodeViewController* controller)
+{
+	XcodeDocumentLocation* location=controller.currentSelectedDocumentLocations.firstObject;
+	return location?location.characterRange:NSMakeRange(0,0);
+}
+
+void focusXcodeViewController(XcodeViewController* controller,NSRange selection)
 {
 	NSURL* fakeURL=[NSURL.alloc initWithString:@""].autorelease;
-	XcodeDocumentLocation* location=[(XcodeDocumentLocation*)[SoftDocumentLocation alloc] initWithDocumentURL:fakeURL timestamp:nil characterRange:NSMakeRange(0,0)].autorelease;
+	XcodeDocumentLocation* location=[(XcodeDocumentLocation*)[SoftDocumentLocation alloc] initWithDocumentURL:fakeURL timestamp:nil characterRange:selection].autorelease;
 	[controller selectDocumentLocations:@[location]];
+	
+	NSMutableArray<NSView*>* views=NSMutableArray.alloc.init.autorelease;
+	[views addObject:controller.view];
+	for(int index=0;index<views.count;index++)
+	{
+		if(views[index].acceptsFirstResponder)
+		{
+			[views[index].window makeFirstResponder:views[index]];
+			break;
+		}
+		
+		[views addObjectsFromArray:views[index].subviews];
+	}
 }
 
 XcodeSettings* getXcodeSettings()

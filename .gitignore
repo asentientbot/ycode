@@ -1,5 +1,3 @@
 .DS_Store
-Ycode.app
-Ycode.zip
-Ycode (Test Build).app
-Ycode (Test Build).zip
+*.app
+*.zip

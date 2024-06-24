@@ -9,7 +9,7 @@ minVersion=10.13
 
 if [[ $1 == test ]]
 then
-	name+=' (Test Build)'
+	name+=' Test'
 	id+=-test
 fi
 
@@ -57,6 +57,6 @@ fi
 set +e
 
 defaults delete $id
-rm ~/"Library/Developer/Xcode/UserData/FontAndColorThemes/$name.xccolortheme"
+rm ~/"Library/Developer/Xcode/UserData/FontAndColorThemes/$name "*.xccolortheme
 
 "./$name.app/Contents/MacOS/$name"

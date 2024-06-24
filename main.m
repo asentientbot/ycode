@@ -8,14 +8,12 @@
 #import "Xcode.m"
 
 #import "SettingsMapping.h"
-#import "ThemeMapping.h"
 #import "Settings.h"
 #import "Document.h"
 #import "WindowController.h"
 #import "Delegate.h"
 
 #import "SettingsMapping.m"
-#import "ThemeMapping.m"
 #import "Settings.m"
 #import "Document.m"
 #import "WindowController.m"

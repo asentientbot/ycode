@@ -35,9 +35,8 @@ void hackFakeHeaderLayout(NSView* self,SEL sel)
 {
 	hackRealHeaderLayout(self,sel);
 	
-	NSView* container=self.superview.superview;
-	container.subviews[0].hidden=true;
-	container.layer.backgroundColor=getXcodeTheme().sourceTextBackgroundColor.CGColor;
+	self.subviews.firstObject.hidden=true;
+	self.layer.backgroundColor=getXcodeTheme().sourceTextBackgroundColor.CGColor;
 }
 
 @implementation WindowController
@@ -52,9 +51,9 @@ void hackFakeHeaderLayout(NSView* self,SEL sel)
 	
 	// TODO: uhh
 	
-	if(NSClassFromString(@"_TtC12SourceEditor16StickyHeaderView"))
+	if(NSClassFromString(@"_TtC12SourceEditor21StickyHeaderStackView"))
 	{
-		swizzle(@"_TtC12SourceEditor16StickyHeaderView",@"layout",true,(IMP)hackFakeHeaderLayout,(IMP*)&hackRealHeaderLayout);
+		swizzle(@"_TtC12SourceEditor21StickyHeaderStackView",@"layout",true,(IMP)hackFakeHeaderLayout,(IMP*)&hackRealHeaderLayout);
 	
 		swizzle(@"NSColor",@"shadowWithLevel:",true,(IMP)hackFakeShadow,NULL);
 		swizzle(@"NSColor",@"highlightWithLevel:",true,(IMP)hackFakeShadow,NULL);

@@ -44,9 +44,9 @@ enum
 -(void)applicationWillFinishLaunching:(NSNotification*)note
 {
 	BOOL firstRun=![NSUserDefaults.standardUserDefaults boolForKey:@"launched"];
-	[NSUserDefaults.standardUserDefaults setBool:true forKey:@"launched"];
 	if(firstRun)
 	{
+		[NSUserDefaults.standardUserDefaults setBool:true forKey:@"launched"];
 		Settings.reset;
 	}
 	

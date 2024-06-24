@@ -68,6 +68,12 @@
 		}
 	}
 	
+	if(!matched)
+	{
+		alert(@"theme missing");
+		return;
+	}
+	
 	setXcodeTheme(matched);
 }
 
@@ -100,40 +106,96 @@
 	return [Settings rectWithPrefix:@"project"];
 }
 
-+(NSString*)themeNameWithSuffix:(NSString*)suffix
++(void)saveThemeWithName:(NSString*)name backgroundColor:(NSString*)backgroundColor highlightColor:(NSString*)highlightColor selectionColor:(NSString*)selectionColor defaultFont:(NSString*)defaultFont defaultColor:(NSString*)defaultColor commentFont:(NSString*)commentFont commentColor:(NSString*)commentColor preprocessorFont:(NSString*)preprocessorFont preprocessorColor:(NSString*)preprocessorColor classFont:(NSString*)classFont classColor:(NSString*)classColor functionFont:(NSString*)functionFont functionColor:(NSString*)functionColor keywordFont:(NSString*)keywordFont keywordColor:(NSString*)keywordColor stringFont:(NSString*)stringFont stringColor:(NSString*)stringColor numberFont:(NSString*)numberFont numberColor:(NSString*)numberColor
+{
+	NSString* basePath=[getXcodeSystemThemesPath() stringByAppendingPathComponent:@"Default (Light).xccolortheme"];
+	NSData* baseData=[NSData dataWithContentsOfFile:basePath];
+	if(!baseData)
+	{
+		alertAbort(@"base theme missing");
+	}
+	
+	NSMutableDictionary* custom=[NSPropertyListSerialization propertyListWithData:baseData options:NSPropertyListMutableContainers format:nil error:nil];
+	if(!custom)
+	{
+		alertAbort(@"base theme broken");
+	}
+	
+	custom[XcodeThemeBackgroundKey]=backgroundColor;
+	custom[XcodeThemeHighlightKey]=highlightColor;
+	custom[XcodeThemeSelectionKey]=selectionColor;
+	custom[XcodeThemeCursorKey]=defaultColor;
+	custom[XcodeThemeInvisiblesKey]=commentColor;
+	
+	NSMutableDictionary* innerFonts=custom[XcodeThemeFontsKey];
+	NSMutableDictionary* innerColors=custom[XcodeThemeColorsKey];
+	for(NSString* key in innerColors.allKeys)
+	{
+		NSString* font=defaultFont;
+		NSString* color=defaultColor;
+		
+		if([XcodeThemeCommentKeys containsObject:key])
+		{
+			font=commentFont;
+			color=commentColor;
+		}
+		else if([XcodeThemePreprocessorKeys containsObject:key])
+		{
+			font=preprocessorFont;
+			color=preprocessorColor;
+		}
+		else if([XcodeThemeClassKeys containsObject:key])
+		{
+			font=classFont;
+			color=classColor;
+		}
+		else if([XcodeThemeFunctionKeys containsObject:key])
+		{
+			font=functionFont;
+			color=functionColor;
+		}
+		else if([XcodeThemeKeywordKeys containsObject:key])
+		{
+			font=keywordFont;
+			color=keywordColor;
+		}
+		else if([XcodeThemeStringKeys containsObject:key])
+		{
+			font=stringFont;
+			color=stringColor;
+		}
+		else if([XcodeThemeNumberKeys containsObject:key])
+		{
+			font=numberFont;
+			color=numberColor;
+		}
+		
+		innerFonts[key]=font;
+		innerColors[key]=[color stringByAppendingString:@" 1"];
+	}
+	
+	NSString* customPath=[getXcodeUserThemesPath() stringByAppendingPathComponent:[name stringByAppendingString:@".xccolortheme"]];
+	[NSFileManager.defaultManager createDirectoryAtPath:customPath.stringByDeletingLastPathComponent withIntermediateDirectories:true attributes:nil error:nil];
+	
+	NSData* customData=[NSPropertyListSerialization dataWithPropertyList:custom format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
+	if(![customData writeToFile:customPath atomically:true])
+	{
+		alertAbort(@"theme write failed");
+	}
+}
+
++(NSString*)simpleThemeNameWithSuffix:(NSString*)suffix
 {
 	return [NSString stringWithFormat:@"%@ %@",getAppName(),suffix];
 }
 
-+(void)saveThemeWithSuffix:(NSString*)suffix background:(NSString*)backgroundColor highlight:(NSString*)highlightColor selection:(NSString*)selectionColor normal:(NSString*)normalColor meta:(NSString*)metaColor type:(NSString*)typeColor keyword:(NSString*)keywordColor string:(NSString*)stringColor number:(NSString*)numberColor
++(void)saveSimpleThemeWithSuffix:(NSString*)suffix background:(NSString*)backgroundColor highlight:(NSString*)highlightColor selection:(NSString*)selectionColor normal:(NSString*)normalColor meta:(NSString*)metaColor type:(NSString*)typeColor keyword:(NSString*)keywordColor string:(NSString*)stringColor number:(NSString*)numberColor
 {
-	ThemeMapping* theme=ThemeMapping.alloc.init.autorelease;
-	
 	NSString* regular=@"SFMono-Regular - 13.0";
 	NSString* italic=@"SFMono-RegularItalic - 13.0";
 	NSString* bold=@"SFMono-Bold - 13.0";
 	
-	theme.defaultFont=regular;
-	theme.defaultColor=normalColor;
-	theme.backgroundColor=backgroundColor;
-	theme.highlightColor=highlightColor;
-	theme.selectionColor=selectionColor;
-	theme.commentFont=italic;
-	theme.commentColor=metaColor;
-	theme.preprocessorFont=regular;
-	theme.preprocessorColor=metaColor;
-	theme.classFont=bold;
-	theme.classColor=typeColor;
-	theme.functionFont=regular;
-	theme.functionColor=typeColor;
-	theme.keywordFont=bold;
-	theme.keywordColor=keywordColor;
-	theme.stringFont=bold;
-	theme.stringColor=stringColor;
-	theme.numberFont=bold;
-	theme.numberColor=numberColor;
-	
-	[theme saveWithName:[Settings themeNameWithSuffix:suffix]];
+	[Settings saveThemeWithName:[Settings simpleThemeNameWithSuffix:suffix] backgroundColor:backgroundColor highlightColor:highlightColor selectionColor:selectionColor defaultFont:regular defaultColor:normalColor commentFont:italic commentColor:metaColor preprocessorFont:regular preprocessorColor:metaColor classFont:bold classColor:typeColor functionFont:regular functionColor:typeColor keywordFont:bold keywordColor:keywordColor stringFont:bold stringColor:stringColor numberFont:bold numberColor:numberColor];
 }
 
 +(void)reset
@@ -143,11 +205,13 @@
 		mapping.reset;
 	}
 	
-	[Settings saveThemeWithSuffix:@"Old" background:@"1 0.9 1" highlight:@"1 0.85 1" selection:@"1 0.75 1" normal:@"0.3 0.3 0.6" meta:@"0.6 0.5 0.8" type:@"0 0.5 0.4" keyword:@"0.8 0 1" string:@"0.85 0.5 0.8" number:@"0.3 0.6 1"];
-	[Settings saveThemeWithSuffix:@"Pink (Light)" background:@"1 0.75 1" highlight:@"1 0.7 1" selection:@"1 0.6 1" normal:@"0.3 0.2 0.5" meta:@"0.5 0.4 0.7" type:@"0.6 0.2 0.8" keyword:@"0.7 0.2 0.6" string:@"0.8 0.4 0.8" number:@"0.5 0.3 0.9"];
-	[Settings saveThemeWithSuffix:@"Pink (Dark)" background:@"0.1 0 0.1" highlight:@"0.15 0 0.15" selection:@"0.25 0 0.25" normal:@"0.5 0.4 0.5" meta:@"0.3 0.2 0.3" type:@"0.5 0.2 0.6" keyword:@"0.5 0.1 0.3" string:@"0.5 0.2 0.4" number:@"0.3 0.2 0.5"];
+	[Settings saveSimpleThemeWithSuffix:@"Pink (Light)" background:@"1 0.75 1" highlight:@"1 0.7 1" selection:@"1 0.6 1" normal:@"0.3 0.2 0.5" meta:@"0.5 0.4 0.7" type:@"0.6 0.2 0.8" keyword:@"0.7 0.2 0.5" string:@"0.8 0.4 0.8" number:@"0.5 0.4 0.9"];
+	[Settings saveSimpleThemeWithSuffix:@"Pink (Dark)" background:@"0.15 0 0.15" highlight:@"0.2 0 0.2" selection:@"0.3 0 0.3" normal:@"0.5 0.4 0.6" meta:@"0.3 0.2 0.4" type:@"0.5 0.2 0.7" keyword:@"0.5 0.1 0.3" string:@"0.5 0.2 0.5" number:@"0.3 0.2 0.7"];
 	
-	[Settings setCurrentThemeName:[Settings themeNameWithSuffix:@"Pink (Light)"]];
+	[Settings saveSimpleThemeWithSuffix:@"Neutral (Light)" background:@"1 1 1" highlight:@"0.95 0.95 1" selection:@"0.8 0.8 1" normal:@"0.3 0.3 0.6" meta:@"0.5 0.5 0.8" type:@"0.6 0.1 1" keyword:@"0.8 0.2 0.4" string:@"0.9 0.4 0.9" number:@"0.2 0.5 1"];
+	[Settings saveSimpleThemeWithSuffix:@"Neutral (Dark)" background:@"0.1 0.1 0.1" highlight:@"0.13 0.13 0.16" selection:@"0.25 0.25 0.4" normal:@"0.5 0.5 0.7" meta:@"0.3 0.3 0.5" type:@"0.5 0.3 0.7" keyword:@"0.6 0.2 0.3" string:@"0.6 0.3 0.6" number:@"0.2 0.3 0.6"];
+	
+	[Settings setCurrentThemeName:[Settings simpleThemeNameWithSuffix:@"Neutral (Light)"]];
 }
 
 @end

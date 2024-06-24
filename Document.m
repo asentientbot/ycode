@@ -1,7 +1,31 @@
 @implementation Document
 
++(void)closeTransientIfNeeded
+{
+	NSArray<Document*>* documents=NSDocumentController.sharedDocumentController.documents;
+	if(documents.count!=2)
+	{
+		return;
+	}
+	
+	for(Document* document in documents)
+	{
+		if(document.fileURL||document.documentEdited)
+		{
+			continue;
+		}
+		
+		[document.windowControllers.firstObject.window performClose:nil];
+	}
+}
+
 -(void)makeWindowControllers
 {
+	if(self.fileURL)
+	{
+		Document.closeTransientIfNeeded;
+	}
+	
 	[self addWindowController:WindowController.alloc.init.autorelease];
 	[self loadWithURL:self.fileURL type:self.fileType];
 }
@@ -42,7 +66,6 @@
 	if(!self.fileURL)
 	{
 		// TODO: a tiny bit weird. maybe we can skip this by moving a bit "later" in the save process.
-		// also, we should be able to do TextEdit-style "transient" untitled documents now
 		
 		NSString* newType=[NSDocumentController.sharedDocumentController typeForContentsOfURL:url error:nil];
 		[self loadWithURL:url type:newType];

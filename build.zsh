@@ -13,7 +13,7 @@ then
 	id+=-test
 fi
 
-rm -rf "$name.app" "$name.zip"
+rm -rf "$name.app" "$name.zip" icon.iconset
 mkdir -p "$name.app/Contents/MacOS"
 mkdir -p "$name.app/Contents/Resources"
 
@@ -21,7 +21,6 @@ clang -fmodules -Wno-unused-getter-return-value -Wno-objc-missing-super-calls -m
 
 clang -fmodules -Wno-deprecated-declarations icon.m -o icon
 ./icon
-rm -rf icon.iconset
 mkdir icon.iconset
 for size in 16 32 128 256 512
 do
@@ -57,6 +56,6 @@ fi
 set +e
 
 defaults delete $id
-rm ~/"Library/Developer/Xcode/UserData/FontAndColorThemes/$name "*.xccolortheme
+rm ~"/Library/Developer/Xcode/UserData/FontAndColorThemes/$name "*.xccolortheme
 
-"./$name.app/Contents/MacOS/$name"
+"$name.app/Contents/MacOS/$name"

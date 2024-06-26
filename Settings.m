@@ -171,7 +171,7 @@
 		}
 		
 		innerFonts[key]=font;
-		innerColors[key]=[color stringByAppendingString:@" 1"];
+		innerColors[key]=color;
 	}
 	
 	NSString* customPath=[getXcodeUserThemesPath() stringByAppendingPathComponent:[name stringByAppendingString:@".xccolortheme"]];
@@ -207,7 +207,6 @@
 	
 	[Settings saveSimpleThemeWithSuffix:@"Pink (Light)" background:@"1 0.75 1" highlight:@"1 0.7 1" selection:@"1 0.6 1" normal:@"0.3 0.2 0.5" meta:@"0.5 0.4 0.7" type:@"0.6 0.2 0.8" keyword:@"0.7 0.2 0.5" string:@"0.8 0.4 0.8" number:@"0.5 0.4 0.9"];
 	[Settings saveSimpleThemeWithSuffix:@"Pink (Dark)" background:@"0.15 0 0.15" highlight:@"0.2 0 0.2" selection:@"0.3 0 0.3" normal:@"0.5 0.4 0.6" meta:@"0.3 0.2 0.4" type:@"0.5 0.2 0.7" keyword:@"0.5 0.1 0.3" string:@"0.5 0.2 0.5" number:@"0.3 0.2 0.7"];
-	
 	[Settings saveSimpleThemeWithSuffix:@"Neutral (Light)" background:@"1 1 1" highlight:@"0.95 0.95 1" selection:@"0.8 0.8 1" normal:@"0.3 0.3 0.6" meta:@"0.5 0.5 0.8" type:@"0.6 0.1 1" keyword:@"0.8 0.2 0.4" string:@"0.9 0.4 0.9" number:@"0.2 0.5 1"];
 	[Settings saveSimpleThemeWithSuffix:@"Neutral (Dark)" background:@"0.1 0.1 0.1" highlight:@"0.13 0.13 0.16" selection:@"0.25 0.25 0.4" normal:@"0.5 0.5 0.7" meta:@"0.3 0.3 0.5" type:@"0.5 0.3 0.7" keyword:@"0.6 0.2 0.3" string:@"0.6 0.3 0.6" number:@"0.2 0.3 0.6"];
 	

@@ -79,6 +79,28 @@
 	[self saveDocument:nil];
 }
 
+-(void)encodeRestorableStateWithCoder:(NSCoder*)coder
+{
+	[super encodeRestorableStateWithCoder:coder];
+	
+	[coder encodeBool:Delegate.shared.projectMode forKey:@"projectMode"];
+}
+
+-(void)restoreStateWithCoder:(NSCoder*)coder
+{
+	[super restoreStateWithCoder:coder];
+	
+	BOOL mode=[coder decodeBoolForKey:@"projectMode"];
+	if(mode!=Delegate.shared.projectMode)
+	{
+		Delegate.shared.projectMode=mode;
+		dispatch_async(dispatch_get_main_queue(),^()
+		{
+			WindowController.syncProjectMode;
+		});
+	}
+}
+
 -(void)dealloc
 {
 	self.xcodeDocument=nil;

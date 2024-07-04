@@ -73,6 +73,8 @@ enum
 	[self addSeparatorTo:titleMenu];
 	[self addItemWithTitle:@"Reset Settings (May Need Reload)" action:@"amySettingsReset:" key:nil to:titleMenu];
 	[self addSeparatorTo:titleMenu];
+	[self addItemWithTitle:[@"Hide " stringByAppendingString:getAppName()] action:@"hide:" key:@"h" to:titleMenu];
+	[self addSeparatorTo:titleMenu];
 	[self addItemWithTitle:@"Quit" action:@"terminate:" key:@"q" to:titleMenu];
 	
 	NSMenu* fileMenu=[self addMenuWithTitle:@"File" to:bar];

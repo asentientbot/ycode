@@ -74,6 +74,8 @@ enum
 	[self addItemWithTitle:@"Reset Settings (May Need Reload)" action:@"amySettingsReset:" key:nil to:titleMenu];
 	[self addSeparatorTo:titleMenu];
 	[self addItemWithTitle:[@"Hide " stringByAppendingString:getAppName()] action:@"hide:" key:@"h" to:titleMenu];
+	[self addItemWithTitle:@"Hide Others" action:@"hideOtherApplications:" key:@"h" mask:NSEventModifierFlagCommand|NSEventModifierFlagOption to:titleMenu];
+	[self addItemWithTitle:@"Show All" action:@"unhideAllApplications:" key:nil to:titleMenu];
 	[self addSeparatorTo:titleMenu];
 	[self addItemWithTitle:@"Quit" action:@"terminate:" key:@"q" to:titleMenu];
 	

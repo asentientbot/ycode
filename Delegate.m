@@ -77,7 +77,7 @@ enum
 	[self addItemWithTitle:@"Hide Others" action:@"hideOtherApplications:" key:@"h" mask:NSEventModifierFlagCommand|NSEventModifierFlagOption to:titleMenu];
 	[self addItemWithTitle:@"Show All" action:@"unhideAllApplications:" key:nil to:titleMenu];
 	[self addSeparatorTo:titleMenu];
-	[self addItemWithTitle:@"Quit" action:@"terminate:" key:@"q" to:titleMenu];
+	[self addItemWithTitle:[@"Quit " stringByAppendingString:getAppName()] action:@"terminate:" key:@"q" to:titleMenu];
 	
 	NSMenu* fileMenu=[self addMenuWithTitle:@"File" to:bar];
 	[self addItemWithTitle:@"New" action:@"newDocument:" key:@"n" to:fileMenu];

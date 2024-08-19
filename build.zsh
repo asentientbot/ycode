@@ -17,10 +17,11 @@ rm -rf "$name.app" "$name.zip" icon.iconset
 mkdir -p "$name.app/Contents/MacOS"
 mkdir -p "$name.app/Contents/Resources"
 
-clang -fmodules -Wno-unused-getter-return-value -Wno-objc-missing-super-calls -mmacosx-version-min=$minVersion -arch x86_64 -arch arm64 -DgitHash=$(git log -1 --format=%H) main.m -o "$name.app/Contents/MacOS/$name"
+clang -fmodules -mmacosx-version-min=$minVersion -arch x86_64 -arch arm64 -DgitHash=$(git log -1 --format=%H) main.m -o "$name.app/Contents/MacOS/$name"
 
-clang -fmodules -Wno-deprecated-declarations icon.m -o icon
+clang -fmodules -DiconMode main.m -o icon
 ./icon
+
 mkdir icon.iconset
 for size in 16 32 128 256 512
 do
@@ -47,7 +48,7 @@ done
 codesign -f -s - "$name.app"
 zip -r "$name.zip" "$name.app"
 
-rm -rf icon icon.png icon.iconset
+rm -rf icon icon.png icon.iconset ~'/Library/Developer/Xcode/UserData/FontAndColorThemes/icon '*.xccolortheme
 
 if [[ $1 != test ]]
 then

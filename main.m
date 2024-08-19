@@ -4,6 +4,10 @@
 @import Darwin;
 @import ObjectiveC;
 
+#pragma clang diagnostic ignored "-Wunused-getter-return-value"
+#pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 #import "Utils.m"
 #import "Xcode.m"
 
@@ -21,9 +25,25 @@
 
 int main(int argc,char** argv)
 {
-	restartIfNeeded(argv);
-	linkXcode();
-	
-	NSApplication.sharedApplication.delegate=Delegate.alloc.init;
-	NSApp.run;
+	@autoreleasepool
+	{
+		restartIfNeeded(argv);
+		linkXcode();
+		
+#ifdef iconMode
+		Settings.reset;
+		
+		CGImageRef image=createThemeAppIcon();
+		NSURL* url=[NSURL fileURLWithPath:@"icon.png"];
+		CGImageDestinationRef destination=CGImageDestinationCreateWithURL((CFURLRef)url,kUTTypePNG,1,NULL);
+		CGImageDestinationAddImage(destination,image,NULL);
+		CGImageDestinationFinalize(destination);
+		
+		CFRelease(image);
+		CFRelease(destination);
+#else
+		NSApplication.sharedApplication.delegate=Delegate.alloc.init;
+		NSApp.run;
+#endif
+	}
 }

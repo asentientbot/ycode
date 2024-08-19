@@ -80,6 +80,7 @@ Class SoftDocumentLocation;
 -(NSColor*)sourceTextBackgroundColor;
 -(NSColor*)sourceTextCurrentLineHighlightColor;
 -(NSColor*)sourceTextSelectionColor;
+-(NSColor*)sourcePlainTextColor;
 
 @end
 
@@ -179,6 +180,11 @@ NSString* getXcodeSystemThemesPath()
 NSString* getXcodeUserThemesPath()
 {
 	return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Developer/Xcode/UserData/FontAndColorThemes"];
+}
+
+CGImageRef createThemeAppIcon()
+{
+	return createAppIcon(getXcodeTheme().sourceTextBackgroundColor.CGColor,getXcodeTheme().sourcePlainTextColor.CGColor,getXcodeTheme().sourceTextCurrentLineHighlightColor.CGColor);
 }
 
 NSMenu* (^contextMenuHook)()=NULL;

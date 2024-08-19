@@ -3,6 +3,45 @@
 #define stringify2(macro) #macro
 #define stringify(macro) stringify2(macro)
 
+CGImageRef createAppIcon(CGColorRef background,CGColorRef stroke,CGColorRef fill)
+{
+	CGRect rect=CGRectMake(0,0,1024,1024);
+	
+	CGColorSpaceRef space=CGColorSpaceCreateDeviceRGB();
+	CGContextRef context=CGBitmapContextCreate(NULL,1024,1024,8,1024*4,space,kCGImageAlphaPremultipliedFirst);
+	CFRelease(space);
+	
+	// TODO: doesn't precisely match Apple's template, but neither does NSIconGenericApplication, so..
+	
+	CALayer* container=CALayer.layer;
+	container.frame=rect;
+	CALayer* round=CALayer.layer;
+	round.frame=CGRectMake(100,100,824,824);
+	round.backgroundColor=background;
+	round.cornerRadius=186;
+	if(@available(macOS 10.15,*))
+	{
+		round.cornerCurve=kCACornerCurveContinuous;
+	}
+	round.shadowOpacity=0.25;
+	round.shadowRadius=10;
+	round.shadowOffset=CGSizeMake(0,-10);
+	[container addSublayer:round];
+	[container renderInContext:context];
+	
+	CGContextSetLineJoin(context,kCGLineJoinRound);
+	CGContextSetLineWidth(context,36);
+	CGContextSetTextDrawingMode(context,kCGTextFillStroke);
+	CGContextSetFillColorWithColor(context,fill);
+	CGContextSetStrokeColorWithColor(context,stroke);
+	CGContextSelectFont(context,"Futura-Bold",650,kCGEncodingMacRoman);
+	CGContextShowTextAtPoint(context,290,410,"y",1);
+	
+	CGImageRef image=CGBitmapContextCreateImage(context);
+	CFRelease(context);
+	return image;
+}
+
 NSString* getAppName()
 {
 	return NSProcessInfo.processInfo.arguments[0].lastPathComponent;

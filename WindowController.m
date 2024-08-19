@@ -180,6 +180,10 @@ void hackFakeHeaderLayout(NSView* self,SEL sel)
 			self.window.resignKeyWindow;
 			self.window.becomeKeyWindow;
 		}
+		
+		CGImageRef icon=createThemeAppIcon();
+		NSApp.applicationIconImage=[NSImage.alloc initWithCGImage:icon size:CGSizeZero].autorelease;
+		CFRelease(icon);
 	});
 }
 

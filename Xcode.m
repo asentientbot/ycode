@@ -60,6 +60,7 @@ Class SoftDocumentLocation;
 #define XcodeThemeSelectionKey @"DVTSourceTextSelectionColor"
 #define XcodeThemeCursorKey @"DVTSourceTextInsertionPointColor"
 #define XcodeThemeInvisiblesKey @"DVTSourceTextInvisiblesColor"
+#define XcodeThemeMarkdownCodeKey @"DVTMarkupTextInlineCodeColor"
 
 #define XcodeThemeFontsKey @"DVTSourceTextSyntaxFonts"
 #define XcodeThemeColorsKey @"DVTSourceTextSyntaxColors"

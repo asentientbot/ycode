@@ -266,6 +266,4 @@ enum
 	[self handleFrameChange:(NSWindow*)note.object];
 }
 
-// TODO: how do TextEdit, Xcode, etc. automatically hide the Dock icon when nothing is open?
-
 @end

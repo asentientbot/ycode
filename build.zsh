@@ -38,7 +38,8 @@ add CFBundleDocumentTypes: dict
 add CFBundleDocumentTypes:0:NSDocumentClass string $class
 add CFBundleDocumentTypes:0:CFBundleTypeRole string Editor
 add CFBundleDocumentTypes:0:LSItemContentTypes array
-add CFBundleDocumentTypes:0:LSItemContentTypes: string $type" | while read command
+add CFBundleDocumentTypes:0:LSItemContentTypes: string $type
+add NSSupportsAutomaticTermination bool true" | while read command
 do
 	/usr/libexec/PlistBuddy "$name.app/Contents/Info.plist" -c "$command"
 done

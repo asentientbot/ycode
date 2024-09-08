@@ -39,6 +39,11 @@ void hackFakeHeaderLayout(NSView* self,SEL sel)
 	self.layer.backgroundColor=getXcodeTheme().sourceTextBackgroundColor.CGColor;
 }
 
+CGImageRef createThemeAppIcon()
+{
+	return createAppIcon(getXcodeTheme().sourceTextBackgroundColor.CGColor,getXcodeTheme().sourcePlainTextColor.CGColor,getXcodeTheme().sourceTextCurrentLineHighlightColor.CGColor);
+}
+
 @implementation WindowController
 
 +(void)initialize

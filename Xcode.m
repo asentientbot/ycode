@@ -122,6 +122,8 @@ void focusXcodeViewController(XcodeViewController* controller,NSRange selection)
 	XcodeDocumentLocation* location=[(XcodeDocumentLocation*)[SoftDocumentLocation alloc] initWithDocumentURL:fakeURL timestamp:nil characterRange:selection].autorelease;
 	[controller selectDocumentLocations:@[location]];
 	
+	// TODO: confusing. make a general "recurse views with block" function
+	
 	NSMutableArray<NSView*>* views=NSMutableArray.alloc.init.autorelease;
 	[views addObject:controller.view];
 	for(int index=0;index<views.count;index++)
@@ -181,11 +183,6 @@ NSString* getXcodeSystemThemesPath()
 NSString* getXcodeUserThemesPath()
 {
 	return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Developer/Xcode/UserData/FontAndColorThemes"];
-}
-
-CGImageRef createThemeAppIcon()
-{
-	return createAppIcon(getXcodeTheme().sourceTextBackgroundColor.CGColor,getXcodeTheme().sourcePlainTextColor.CGColor,getXcodeTheme().sourceTextCurrentLineHighlightColor.CGColor);
 }
 
 NSMenu* (^contextMenuHook)()=NULL;

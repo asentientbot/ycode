@@ -171,8 +171,8 @@ enum
 				Document* document=NSApp.keyWindow.windowController.document;
 				if(document)
 				{
-					menuItem.title=[NSString stringWithFormat:@"Claim File Type (%@)",document.fileType];
-					NSString* existing=((NSString*)LSCopyDefaultRoleHandlerForContentType((CFStringRef)document.fileType,kLSRolesAll)).autorelease;
+					menuItem.title=[NSString stringWithFormat:@"Claim File Type (%@)",document.xcodeDocument.fileType];
+					NSString* existing=((NSString*)LSCopyDefaultRoleHandlerForContentType((CFStringRef)document.xcodeDocument.fileType,kLSRolesAll)).autorelease;
 					if([existing isEqual:NSBundle.mainBundle.bundleIdentifier])
 					{
 						disabled=true;
@@ -243,7 +243,7 @@ enum
 -(void)amyClaimFileAssociation:(NSMenuItem*)sender
 {
 	Document* document=NSApp.keyWindow.windowController.document;
-	LSSetDefaultRoleHandlerForContentType((CFStringRef)document.fileType,kLSRolesAll,(CFStringRef)NSBundle.mainBundle.bundleIdentifier);
+	LSSetDefaultRoleHandlerForContentType((CFStringRef)document.xcodeDocument.fileType,kLSRolesAll,(CFStringRef)NSBundle.mainBundle.bundleIdentifier);
 }
 
 -(void)handleFrameChange:(NSWindow*)window

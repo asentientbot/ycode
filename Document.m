@@ -27,18 +27,20 @@
 	}
 	
 	[self addWindowController:WindowController.alloc.init.autorelease];
-	[self loadWithURL:self.fileURL type:self.fileType];
+	[self loadWithURL:self.fileURL];
 }
 
--(void)loadWithURL:(NSURL*)url type:(NSString*)type
+-(void)loadWithURL:(NSURL*)url
 {
 	NSURL* tempURL=getTempURL();
+	NSString* type;
 	if(url)
 	{
 		if(![NSFileManager.defaultManager copyItemAtURL:url toURL:tempURL error:nil])
 		{
 			alertAbort(@"copy error");
 		}
+		type=[NSDocumentController.sharedDocumentController typeForContentsOfURL:url error:nil];
 	}
 	else
 	{
@@ -46,6 +48,7 @@
 		{
 			alertAbort(@"touch error");
 		}
+		type=self.fileType;
 	}
 	
 	self.xcodeDocument=getXcodeDocument(tempURL,type);
@@ -65,10 +68,7 @@
 	
 	if(!self.fileURL)
 	{
-		// TODO: a tiny bit weird. maybe we can skip this by moving a bit "later" in the save process.
-		
-		NSString* newType=[NSDocumentController.sharedDocumentController typeForContentsOfURL:url error:nil];
-		[self loadWithURL:url type:newType];
+		[self loadWithURL:url];
 	}
 	
 	return result;

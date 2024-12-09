@@ -139,6 +139,8 @@ enum
 	}
 	
 	NSApp.mainMenu=bar;
+	
+	self.currentScreenKey=Settings.screenKey;
 }
 
 -(BOOL)validateUserInterfaceItem:(NSObject<NSValidatedUserInterfaceItem>*)item
@@ -253,6 +255,11 @@ enum
 		return;
 	}
 	
+	if(![self.currentScreenKey isEqual:Settings.screenKey])
+	{
+		return;
+	}
+	
 	Settings.projectRect=window.frame;
 }
 
@@ -264,6 +271,19 @@ enum
 -(void)windowDidMove:(NSNotification*)note
 {
 	[self handleFrameChange:(NSWindow*)note.object];
+}
+
+-(void)applicationDidChangeScreenParameters:(NSNotification*)note
+{
+	WindowController.syncProjectMode;
+	self.currentScreenKey=Settings.screenKey;
+}
+
+-(void)dealloc
+{
+	self.currentScreenKey=nil;
+	
+	super.dealloc;
 }
 
 @end

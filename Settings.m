@@ -77,22 +77,39 @@
 	setXcodeTheme(matched);
 }
 
++(NSString*)screenKey
+{
+	CGRect screenRect=NSScreen.mainScreen.frame;
+	return [NSString stringWithFormat:@"screen %ld %ld %ld %ld",(long)screenRect.origin.x,(long)screenRect.origin.y,(long)screenRect.size.width,(long)screenRect.size.height];
+}
+
++(NSString*)rectKeyWithPrefix:(NSString*)prefix suffix:(NSString*)suffix
+{
+	return [NSString stringWithFormat:@"%@ - %@ - %@",prefix,Settings.screenKey,suffix];
+}
+
 +(void)saveRect:(CGRect)rect withPrefix:(NSString*)prefix
 {
 	NSUserDefaults* defaults=NSUserDefaults.standardUserDefaults;
-	[defaults setDouble:rect.origin.x forKey:[prefix stringByAppendingString:@".x"]];
-	[defaults setDouble:rect.origin.y forKey:[prefix stringByAppendingString:@".y"]];
-	[defaults setDouble:rect.size.width forKey:[prefix stringByAppendingString:@".width"]];
-	[defaults setDouble:rect.size.height forKey:[prefix stringByAppendingString:@".height"]];
+	[defaults setDouble:rect.origin.x forKey:[Settings rectKeyWithPrefix:prefix suffix:@"x"]];
+	[defaults setDouble:rect.origin.y forKey:[Settings rectKeyWithPrefix:prefix suffix:@"y"]];
+	[defaults setDouble:rect.size.width forKey:[Settings rectKeyWithPrefix:prefix suffix:@"width"]];
+	[defaults setDouble:rect.size.height forKey:[Settings rectKeyWithPrefix:prefix suffix:@"height"]];
 }
 
 +(CGRect)rectWithPrefix:(NSString*)prefix
 {
 	NSUserDefaults* defaults=NSUserDefaults.standardUserDefaults;
-	CGFloat x=[defaults doubleForKey:[prefix stringByAppendingString:@".x"]];
-	CGFloat y=[defaults doubleForKey:[prefix stringByAppendingString:@".y"]];
-	CGFloat width=[defaults doubleForKey:[prefix stringByAppendingString:@".width"]];
-	CGFloat height=[defaults doubleForKey:[prefix stringByAppendingString:@".height"]];
+	CGFloat x=[defaults doubleForKey:[Settings rectKeyWithPrefix:prefix suffix:@"x"]];
+	CGFloat y=[defaults doubleForKey:[Settings rectKeyWithPrefix:prefix suffix:@"y"]];
+	CGFloat width=[defaults doubleForKey:[Settings rectKeyWithPrefix:prefix suffix:@"width"]];
+	CGFloat height=[defaults doubleForKey:[Settings rectKeyWithPrefix:prefix suffix:@"height"]];
+	
+	if(width<100||height<100)
+	{
+		return CGRectZero;
+	}
+	
 	return CGRectMake(x,y,width,height);
 }
 
@@ -187,18 +204,13 @@
 	}
 }
 
-+(NSString*)simpleThemeNameWithSuffix:(NSString*)suffix
-{
-	return [NSString stringWithFormat:@"%@ %@",getAppName(),suffix];
-}
-
-+(void)saveSimpleThemeWithSuffix:(NSString*)suffix background:(NSString*)backgroundColor highlight:(NSString*)highlightColor selection:(NSString*)selectionColor normal:(NSString*)normalColor meta:(NSString*)metaColor type:(NSString*)typeColor keyword:(NSString*)keywordColor string:(NSString*)stringColor number:(NSString*)numberColor
++(void)saveSimpleThemeWithName:(NSString*)name background:(NSString*)backgroundColor highlight:(NSString*)highlightColor selection:(NSString*)selectionColor normal:(NSString*)normalColor meta:(NSString*)metaColor type:(NSString*)typeColor keyword:(NSString*)keywordColor string:(NSString*)stringColor number:(NSString*)numberColor
 {
 	NSString* regular=@"SFMono-Regular - 13.0";
 	NSString* italic=@"SFMono-RegularItalic - 13.0";
 	NSString* bold=@"SFMono-Bold - 13.0";
 	
-	[Settings saveThemeWithName:[Settings simpleThemeNameWithSuffix:suffix] backgroundColor:backgroundColor highlightColor:highlightColor selectionColor:selectionColor defaultFont:regular defaultColor:normalColor commentFont:italic commentColor:metaColor preprocessorFont:regular preprocessorColor:metaColor classFont:bold classColor:typeColor functionFont:regular functionColor:typeColor keywordFont:bold keywordColor:keywordColor stringFont:bold stringColor:stringColor numberFont:bold numberColor:numberColor];
+	[Settings saveThemeWithName:name backgroundColor:backgroundColor highlightColor:highlightColor selectionColor:selectionColor defaultFont:regular defaultColor:normalColor commentFont:italic commentColor:metaColor preprocessorFont:regular preprocessorColor:metaColor classFont:bold classColor:typeColor functionFont:regular functionColor:typeColor keywordFont:bold keywordColor:keywordColor stringFont:bold stringColor:stringColor numberFont:bold numberColor:numberColor];
 }
 
 +(void)reset
@@ -208,9 +220,8 @@
 		mapping.reset;
 	}
 	
-	[Settings saveSimpleThemeWithSuffix:@"Neutral" background:@"1 1 1" highlight:@"0.95 0.95 1" selection:@"0.8 0.8 1" normal:@"0.3 0.3 0.6" meta:@"0.5 0.5 0.8" type:@"0.6 0.1 1" keyword:@"0.8 0.2 0.4" string:@"0.9 0.4 0.9" number:@"0.2 0.5 1"];
-	
-	[Settings setCurrentThemeName:[Settings simpleThemeNameWithSuffix:@"Neutral"]];
+	[Settings saveSimpleThemeWithName:getAppName() background:@"1 1 1" highlight:@"0.95 0.95 1" selection:@"0.8 0.8 1" normal:@"0.3 0.3 0.6" meta:@"0.5 0.5 0.8" type:@"0.6 0.1 1" keyword:@"0.8 0.2 0.4" string:@"0.9 0.4 0.9" number:@"0.2 0.5 1"];
+	[Settings setCurrentThemeName:getAppName()];
 }
 
 @end

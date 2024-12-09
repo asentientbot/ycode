@@ -143,22 +143,31 @@ CGImageRef createThemeAppIcon()
 	if(Delegate.shared.projectMode)
 	{
 		self.window.tabbingMode=NSWindowTabbingModePreferred;
-		[self.window setFrame:Settings.projectRect display:false];
-		
-		return;
+	}
+	else
+	{
+		self.window.tabbingMode=NSWindowTabbingModeDisallowed;
+		[self.window moveTabToNewWindow:nil];
 	}
 	
-	self.window.tabbingMode=NSWindowTabbingModeDisallowed;
-	[self.window moveTabToNewWindow:nil];
+	// TODO: i feel like some of this should be in Settings, but we don't have access to previous window and toolbar height there..
 	
 	CGRect previousRect=previous?previous.window.frame:NSScreen.mainScreen.visibleFrame;
 	CGFloat toolbarHeight=[self.window frameRectForContentRect:CGRectZero].size.height;
 	CGRect cascadedRect=CGRectMake(previousRect.origin.x+toolbarHeight,previousRect.origin.y+previousRect.size.height-ScratchHeight-toolbarHeight,ScratchWidth,ScratchHeight);
-	[self.window setFrame:cascadedRect display:false];
 	
 	if(CGRectEqualToRect(Settings.projectRect,CGRectZero))
 	{
 		Settings.projectRect=cascadedRect;
+	}
+	
+	if(Delegate.shared.projectMode)
+	{
+		[self.window setFrame:Settings.projectRect display:false];
+	}
+	else
+	{
+		[self.window setFrame:cascadedRect display:false];
 	}
 }
 

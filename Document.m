@@ -64,7 +64,12 @@
 
 -(BOOL)writeSafelyToURL:(NSURL*)url ofType:(NSString*)type forSaveOperation:(NSSaveOperationType)operation error:(NSError**)error
 {
+	NSNumber* permissions=[NSFileManager.defaultManager attributesOfItemAtPath:url.path error:nil][NSFilePosixPermissions];
 	BOOL result=[self.xcodeDocument writeSafelyToURL:url ofType:type forSaveOperation:NSSaveToOperation error:error];
+	if(permissions)
+	{
+		[NSFileManager.defaultManager setAttributes:@{NSFilePosixPermissions:permissions} ofItemAtPath:url.path error:nil];
+	}
 	
 	if(!self.fileURL)
 	{

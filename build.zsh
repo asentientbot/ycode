@@ -19,7 +19,7 @@ mkdir -p "$name.app/Contents/Resources"
 
 clang -fmodules -mmacosx-version-min=$minVersion -arch x86_64 -arch arm64 -DgitHash=$(git log -1 --format=%H) main.m -o "$name.app/Contents/MacOS/$name"
 
-clang -fmodules -DiconMode main.m -o icon
+clang -fmodules -D iconMode main.m -o icon
 ./icon
 
 mkdir icon.iconset

@@ -53,4 +53,11 @@
 	[self setValue:!self.getValue];
 }
 
+-(void)dealloc
+{
+	self.name=nil;
+	
+	super.dealloc;
+}
+
 @end

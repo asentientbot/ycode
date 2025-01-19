@@ -145,8 +145,6 @@
 	custom[XcodeThemeInvisiblesKey]=commentColor;
 	custom[XcodeThemeMarkdownCodeKey]=stringColor;
 	
-	// TODO: markdown is fine on cass now but randomly sans-serif on zoe??
-	
 	NSMutableDictionary* innerFonts=custom[XcodeThemeFontsKey];
 	NSMutableDictionary* innerColors=custom[XcodeThemeColorsKey];
 	for(NSString* key in innerColors.allKeys)

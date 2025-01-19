@@ -1,5 +1,3 @@
-// TODO: lol
-
 @import AppKit;
 @import Darwin;
 @import ObjectiveC;
@@ -7,6 +5,8 @@
 #pragma clang diagnostic ignored "-Wunused-getter-return-value"
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"
 #pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
+// TODO: lol
 
 #import "Utils.m"
 #import "Xcode.m"

@@ -98,17 +98,25 @@
 	BOOL mode=[coder decodeBoolForKey:@"projectMode"];
 	if(mode!=Delegate.shared.projectMode)
 	{
-		Delegate.shared.projectMode=mode;
 		dispatch_async(dispatch_get_main_queue(),^()
 		{
+			Delegate.shared.projectMode=mode;
 			WindowController.syncProjectMode;
 		});
 	}
 }
 
+-(void)close
+{
+	self.xcodeDocument.close;
+	
+	super.close;
+}
+
 -(void)dealloc
 {
 	self.xcodeDocument=nil;
+	
 	super.dealloc;
 }
 

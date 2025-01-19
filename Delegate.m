@@ -1,10 +1,10 @@
 enum
 {
 	TagSetting=1,
-	TagTheme=2,
-	TagProjectMode=3,
-	TagTab=4,
-	TagFileAssociation=5
+	TagTheme,
+	TagProjectMode,
+	TagTab,
+	TagFileAssociation
 };
 
 @implementation Delegate
@@ -64,14 +64,14 @@ enum
 	NSMenu* bar=NSMenu.alloc.init.autorelease;
 	
 	NSMenu* titleMenu=[self addMenuWithTitle:getAppName() to:bar];
-	[self addItemWithTitle:[@"About " stringByAppendingString:getAppName()] action:@"amyAbout:" key:nil to:titleMenu];
+	[self addItemWithTitle:[@"About " stringByAppendingString:getAppName()] action:@"handleAbout:" key:nil to:titleMenu];
 	[self addSeparatorTo:titleMenu];
 	for(NSString* name in Settings.allMappingNames)
 	{
-		[self addItemWithTitle:name action:@"amySettingsToggle:" key:nil to:titleMenu].tag=TagSetting;
+		[self addItemWithTitle:name action:@"handleSettingsToggle:" key:nil to:titleMenu].tag=TagSetting;
 	}
 	[self addSeparatorTo:titleMenu];
-	[self addItemWithTitle:@"Reset Settings (May Need Reload)" action:@"amySettingsReset:" key:nil to:titleMenu];
+	[self addItemWithTitle:@"Reset Settings (May Need Reload)" action:@"handleSettingsReset:" key:nil to:titleMenu];
 	[self addSeparatorTo:titleMenu];
 	[self addItemWithTitle:[@"Hide " stringByAppendingString:getAppName()] action:@"hide:" key:@"h" to:titleMenu];
 	[self addItemWithTitle:@"Hide Others" action:@"hideOtherApplications:" key:@"h" mask:NSEventModifierFlagCommand|NSEventModifierFlagOption to:titleMenu];
@@ -85,9 +85,9 @@ enum
 	[self addSeparatorTo:fileMenu];
 	[self addItemWithTitle:@"Close" action:@"performClose:" key:@"w" to:fileMenu];
 	[self addSeparatorTo:fileMenu];
-	[self addItemWithTitle:@"Save" action:@"amySave:" key:@"s" to:fileMenu];
+	[self addItemWithTitle:@"Save" action:@"handleSave:" key:@"s" to:fileMenu];
 	[self addSeparatorTo:fileMenu];
-	[self addItemWithTitle:@"" action:@"amyClaimFileAssociation:" key:nil to:fileMenu].tag=TagFileAssociation;
+	[self addItemWithTitle:@"" action:@"handleClaimFileAssociation:" key:nil to:fileMenu].tag=TagFileAssociation;
 	
 	NSMenu* editMenu=[self addMenuWithTitle:@"Edit" to:bar];
 	[self addItemWithTitle:@"Undo" action:@"undo:" key:@"z" to:editMenu];
@@ -109,13 +109,13 @@ enum
 	NSMenu* viewMenu=[self addMenuWithTitle:@"View" to:bar];
 	for(NSString* name in Settings.allThemeNames)
 	{
-		[self addItemWithTitle:name action:@"amySetTheme:" key:nil to:viewMenu].tag=TagTheme;
+		[self addItemWithTitle:name action:@"handleSetTheme:" key:nil to:viewMenu].tag=TagTheme;
 	}
 	[self addSeparatorTo:viewMenu];
 	[self addItemWithTitle:@"Enter Full Screen" action:@"toggleFullScreen:" key:@"f" mask:NSEventModifierFlagCommand|NSEventModifierFlagControl to:viewMenu];
 	
 	NSMenu* windowMenu=[self addMenuWithTitle:@"Window" to:bar];
-	[self addItemWithTitle:@"Project Mode" action:@"amyToggleProjectMode:" key:@"p" to:windowMenu].tag=TagProjectMode;
+	[self addItemWithTitle:@"Project Mode" action:@"handleToggleProjectMode:" key:@"p" to:windowMenu].tag=TagProjectMode;
 	[self addSeparatorTo:windowMenu];
 	[self addItemWithTitle:@"Minimize" action:@"performMiniaturize:" key:@"m" to:windowMenu];
 	[self addItemWithTitle:@"Zoom" action:@"performZoom:" key:nil to:windowMenu];
@@ -135,7 +135,7 @@ enum
 			title=[NSString stringWithFormat:@"Show Tab %d",index];
 		}
 		NSString* key=[NSString stringWithFormat:@"%d",index];
-		[self addItemWithTitle:title action:@"amySelectTab:" key:key to:windowMenu].tag=TagTab;
+		[self addItemWithTitle:title action:@"handleSelectTab:" key:key to:windowMenu].tag=TagTab;
 	}
 	
 	NSApp.mainMenu=bar;
@@ -198,7 +198,7 @@ enum
 	return true;
 }
 
--(void)amySelectTab:(NSMenuItem*)sender
+-(void)handleSelectTab:(NSMenuItem*)sender
 {
 	int value=sender.keyEquivalent.intValue;
 	if(value==9)
@@ -210,7 +210,7 @@ enum
 	[windows[MIN(value,windows.count)-1] makeKeyAndOrderFront:nil];
 }
 
--(void)amyAbout:(NSMenuItem*)sender
+-(void)handleAbout:(NSMenuItem*)sender
 {
 	NSString* gitInfo=[NSString stringWithUTF8String:stringify(gitHash)];
 	if(gitInfo.length==0)
@@ -221,28 +221,28 @@ enum
 	alert([NSString stringWithFormat:@"Amy's meme text editor\n\n%@",gitInfo]);
 }
 
--(void)amySettingsToggle:(NSMenuItem*)sender
+-(void)handleSettingsToggle:(NSMenuItem*)sender
 {
 	[Settings mappingWithName:sender.title].toggle;
 }
 
--(void)amySettingsReset:(NSMenuItem*)sender
+-(void)handleSettingsReset:(NSMenuItem*)sender
 {
 	Settings.reset;
 }
 
--(void)amySetTheme:(NSMenuItem*)sender
+-(void)handleSetTheme:(NSMenuItem*)sender
 {
 	[Settings setCurrentThemeName:sender.title];
 }
 
--(void)amyToggleProjectMode:(NSMenuItem*)sender
+-(void)handleToggleProjectMode:(NSMenuItem*)sender
 {
 	self.projectMode=!self.projectMode;
 	WindowController.syncProjectMode;
 }
 
--(void)amyClaimFileAssociation:(NSMenuItem*)sender
+-(void)handleClaimFileAssociation:(NSMenuItem*)sender
 {
 	Document* document=NSApp.keyWindow.windowController.document;
 	LSSetDefaultRoleHandlerForContentType((CFStringRef)document.xcodeDocument.fileType,kLSRolesAll,(CFStringRef)NSBundle.mainBundle.bundleIdentifier);

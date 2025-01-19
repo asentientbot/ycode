@@ -44,6 +44,7 @@ Class SoftDocumentLocation;
 -(instancetype)initWithNibName:(NSString*)nib bundle:(NSBundle*)bundle document:(NSDocument*)document;
 -(void)selectDocumentLocations:(NSArray<XcodeDocumentLocation*>*)locations;
 -(NSArray<XcodeDocumentLocation*>*)currentSelectedDocumentLocations;
+-(void)invalidate;
 
 @end
 

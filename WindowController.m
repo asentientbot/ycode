@@ -203,7 +203,13 @@ CGImageRef createThemeAppIcon()
 
 -(void)dealloc
 {
+	// TODO: idk exactly what this does, but it fixes the memory leak. empirically, XcodeViewController.invalidate and XcodeDocument.close are both needed in addition to releasing normally
+	
+	self.window.contentView=nil;
+	self.xcodeViewController.invalidate;
+	
 	self.xcodeViewController=nil;
+	
 	super.dealloc;
 }
 

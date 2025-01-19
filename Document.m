@@ -79,7 +79,7 @@
 	return result;
 }
 
--(void)amySave:(NSMenuItem*)sender
+-(void)handleSave:(NSMenuItem*)sender
 {
 	[self saveDocument:nil];
 }

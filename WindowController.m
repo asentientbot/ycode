@@ -132,6 +132,10 @@ CGImageRef createThemeAppIcon()
 {
 	NSRange oldSelection=getXcodeViewControllerSelection(self.xcodeViewController);
 	
+	// TODO: this and the similar copy+pasted dealloc code in Document.m should be moved somewhere else, probably Xcode.m or custom property setter
+	
+	self.window.contentView=nil;
+	self.xcodeViewController.invalidate;
 	self.xcodeViewController=getXcodeViewController(document.xcodeDocument);
 	self.window.contentView=self.xcodeViewController.view;
 	

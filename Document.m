@@ -51,6 +51,7 @@
 		type=self.fileType;
 	}
 	
+	self.xcodeDocument.close;
 	self.xcodeDocument=getXcodeDocument(tempURL,type);
 	self.undoManager=self.xcodeDocument.undoManager;
 	

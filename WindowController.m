@@ -44,30 +44,35 @@ CGImageRef createThemeAppIcon()
 	return createAppIcon(getXcodeTheme().sourceTextBackgroundColor.CGColor,getXcodeTheme().sourcePlainTextColor.CGColor,getXcodeTheme().sourceTextCurrentLineHighlightColor.CGColor);
 }
 
+dispatch_once_t windowControllerInitializeOnce;
+
 @implementation WindowController
 
 +(void)initialize
 {
-	if(@available(macOS 11,*))
+	dispatch_once(&windowControllerInitializeOnce,^()
 	{
-		swizzle(@"NSColor",@"colorNamed:bundle:",false,(IMP)hackFakeColor,(IMP*)&hackRealColor);
-		swizzle(@"NSTitlebarSeparatorView",@"updateLayer",true,(IMP)returnNil,NULL);
-	}
-	
-	// TODO: uhh
-	
-	if(NSClassFromString(@"_TtC12SourceEditor21StickyHeaderStackView"))
-	{
-		swizzle(@"_TtC12SourceEditor21StickyHeaderStackView",@"layout",true,(IMP)hackFakeHeaderLayout,(IMP*)&hackRealHeaderLayout);
-	
-		swizzle(@"NSColor",@"shadowWithLevel:",true,(IMP)hackFakeShadow,NULL);
-		swizzle(@"NSColor",@"highlightWithLevel:",true,(IMP)hackFakeShadow,NULL);
-	}
-	
-	[NSNotificationCenter.defaultCenter addObserverForName:XcodeThemeChangedKey object:nil queue:nil usingBlock:^(NSNotification* note)
-	{
-		[WindowController.allInstances makeObjectsPerformSelector:@selector(syncTheme)];
-	}];
+		if(@available(macOS 11,*))
+		{
+			swizzle(@"NSColor",@"colorNamed:bundle:",false,(IMP)hackFakeColor,(IMP*)&hackRealColor);
+			swizzle(@"NSTitlebarSeparatorView",@"updateLayer",true,(IMP)returnNil,NULL);
+		}
+		
+		// TODO: uhh
+		
+		if(NSClassFromString(@"_TtC12SourceEditor21StickyHeaderStackView"))
+		{
+			swizzle(@"_TtC12SourceEditor21StickyHeaderStackView",@"layout",true,(IMP)hackFakeHeaderLayout,(IMP*)&hackRealHeaderLayout);
+			
+			swizzle(@"NSColor",@"shadowWithLevel:",true,(IMP)hackFakeShadow,NULL);
+			swizzle(@"NSColor",@"highlightWithLevel:",true,(IMP)hackFakeShadow,NULL);
+		}
+		
+		[NSNotificationCenter.defaultCenter addObserverForName:XcodeThemeChangedKey object:nil queue:nil usingBlock:^(NSNotification* note)
+		{
+			[WindowController.allInstances makeObjectsPerformSelector:@selector(syncTheme)];
+		}];
+	});
 }
 
 +(NSArray<WindowController*>*)allInstances

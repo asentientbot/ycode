@@ -208,7 +208,7 @@
 	NSString* italic=@"SFMono-RegularItalic - 13.0";
 	NSString* bold=@"SFMono-Bold - 13.0";
 	
-	[Settings saveThemeWithName:name backgroundColor:backgroundColor highlightColor:highlightColor selectionColor:selectionColor defaultFont:regular defaultColor:normalColor commentFont:italic commentColor:metaColor preprocessorFont:regular preprocessorColor:metaColor classFont:bold classColor:typeColor functionFont:regular functionColor:typeColor keywordFont:bold keywordColor:keywordColor stringFont:bold stringColor:stringColor numberFont:bold numberColor:numberColor];
+	[Settings saveThemeWithName:name backgroundColor:backgroundColor highlightColor:highlightColor selectionColor:selectionColor defaultFont:regular defaultColor:normalColor commentFont:italic commentColor:metaColor preprocessorFont:regular preprocessorColor:metaColor classFont:bold classColor:typeColor functionFont:bold functionColor:typeColor keywordFont:bold keywordColor:keywordColor stringFont:bold stringColor:stringColor numberFont:bold numberColor:numberColor];
 }
 
 +(void)reset
@@ -218,7 +218,7 @@
 		mapping.reset;
 	}
 	
-	[Settings saveSimpleThemeWithName:getAppName() background:@"1 1 1" highlight:@"0.95 0.95 1" selection:@"0.8 0.8 1" normal:@"0.3 0.3 0.6" meta:@"0.5 0.5 0.8" type:@"0.6 0.1 1" keyword:@"0.8 0.2 0.4" string:@"0.9 0.4 0.9" number:@"0.2 0.5 1"];
+	[Settings saveSimpleThemeWithName:getAppName() background:@"1 1 1" highlight:@"0.95 0.925 1" selection:@"0.85 0.775 1" normal:@"0.4 0.3 0.7" meta:@"0.6 0.5 0.9" type:@"0.5 0.2 0.8" keyword:@"0.7 0.2 0.8" string:@"0.85 0.35 1" number:@"0.45 0.3 1"];
 	[Settings setCurrentThemeName:getAppName()];
 }
 

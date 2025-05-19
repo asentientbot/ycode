@@ -30,7 +30,7 @@ CGImageRef createAppIcon(CGColorRef background,CGColorRef stroke,CGColorRef fill
 	[container renderInContext:context];
 	
 	CGContextSetLineJoin(context,kCGLineJoinRound);
-	CGContextSetLineWidth(context,36);
+	CGContextSetLineWidth(context,40);
 	CGContextSetTextDrawingMode(context,kCGTextFillStroke);
 	CGContextSetFillColorWithColor(context,fill);
 	CGContextSetStrokeColorWithColor(context,stroke);

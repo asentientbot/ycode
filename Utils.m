@@ -1,7 +1,7 @@
 #define trace NSLog
 
-#define stringify2(macro) #macro
-#define stringify(macro) stringify2(macro)
+#define stringify2(name) #name
+#define stringify(name) stringify2(name)
 
 CGImageRef createAppIcon(CGColorRef background,CGColorRef stroke,CGColorRef fill)
 {
@@ -77,7 +77,7 @@ void swizzle(NSString* className,NSString* selName,BOOL isInstance,IMP newImp,IM
 	}
 	
 	SEL sel=NSSelectorFromString(selName);
-	Method method=isInstance?class_getInstanceMethod(class,sel):class_getClassMethod(class,sel);
+	Method method=(isInstance?class_getInstanceMethod:class_getClassMethod)(class,sel);
 	if(!method)
 	{
 		alertAbort(@"swizzle method missing");

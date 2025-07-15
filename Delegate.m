@@ -4,7 +4,8 @@ enum
 	TagTheme,
 	TagProjectMode,
 	TagTab,
-	TagFileAssociation
+	TagFileAssociation,
+	TagReopen
 };
 
 @implementation Delegate
@@ -82,6 +83,7 @@ enum
 	NSMenu* fileMenu=[self addMenuWithTitle:@"File" to:bar];
 	[self addItemWithTitle:@"New" action:@"newDocument:" key:@"n" to:fileMenu];
 	[self addItemWithTitle:@"Open" action:@"openDocument:" key:@"o" to:fileMenu];
+	[self addItemWithTitle:@"" action:@"handleReopen:" key:@"T" to:fileMenu].tag=TagReopen;
 	[self addSeparatorTo:fileMenu];
 	[self addItemWithTitle:@"Close" action:@"performClose:" key:@"w" to:fileMenu];
 	[self addSeparatorTo:fileMenu];
@@ -173,7 +175,7 @@ enum
 				Document* document=NSApp.keyWindow.windowController.document;
 				if(document)
 				{
-					menuItem.title=[NSString stringWithFormat:@"Claim File Type (%@)",document.xcodeDocument.fileType];
+					menuItem.title=[NSString stringWithFormat:@"Claim File Type \"%@\"",document.xcodeDocument.fileType];
 					NSString* existing=((NSString*)LSCopyDefaultRoleHandlerForContentType((CFStringRef)document.xcodeDocument.fileType,kLSRolesAll)).autorelease;
 					if([existing isEqual:NSBundle.mainBundle.bundleIdentifier])
 					{
@@ -183,6 +185,19 @@ enum
 				else
 				{
 					menuItem.title=@"Claim File Type";
+					disabled=true;
+				}
+				break;
+			case TagReopen:
+				;
+				NSURL* url=self.urlToReopen;
+				if(url)
+				{
+					menuItem.title=[NSString stringWithFormat:@"Reopen \"%@\"",url.lastPathComponent];
+				}
+				else
+				{
+					menuItem.title=@"Reopen Last Closed";
 					disabled=true;
 				}
 				break;
@@ -208,6 +223,26 @@ enum
 
 	NSArray<NSWindow*>* windows=NSApp.keyWindow.tabbedWindows;
 	[windows[MIN(value,windows.count)-1] makeKeyAndOrderFront:nil];
+}
+
+-(NSURL*)urlToReopen
+{
+	for(NSURL* url in NSDocumentController.sharedDocumentController.recentDocumentURLs)
+	{
+		if(![NSDocumentController.sharedDocumentController documentForURL:url])
+		{
+			return url;
+		}
+	}
+	
+	return nil;
+}
+
+-(void)handleReopen:(NSMenuItem*)sender
+{
+	[NSDocumentController.sharedDocumentController openDocumentWithContentsOfURL:self.urlToReopen display:true completionHandler:^(NSDocument* document,BOOL wasAlreadyOpen,NSError* error)
+	{
+	}];
 }
 
 -(void)handleAbout:(NSMenuItem*)sender

@@ -46,18 +46,20 @@ do
 done
 
 codesign -f -s - "$name.app"
-zip -r "$name.zip" "$name.app"
-
-rm -rf icon icon.png icon.iconset ~'/Library/Developer/Xcode/UserData/FontAndColorThemes/icon.xccolortheme'
 
 if [[ $1 != test ]]
 then
-	exit
+	zip -r "$name.zip" "$name.app"
 fi
 
-set +e
+rm -rf icon icon.png icon.iconset ~'/Library/Developer/Xcode/UserData/FontAndColorThemes/icon.xccolortheme'
 
-defaults delete $id
-rm ~"/Library/Developer/Xcode/UserData/FontAndColorThemes/$name.xccolortheme"
-
-"$name.app/Contents/MacOS/$name"
+if [[ $1 == test ]]
+then
+	set +e
+	
+	defaults delete $id
+	rm ~"/Library/Developer/Xcode/UserData/FontAndColorThemes/$name.xccolortheme"
+	
+	"$name.app/Contents/MacOS/$name"
+fi

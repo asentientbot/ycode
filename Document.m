@@ -99,11 +99,8 @@
 	BOOL mode=[coder decodeBoolForKey:@"projectMode"];
 	if(mode!=Delegate.shared.projectMode)
 	{
-		dispatch_async(dispatch_get_main_queue(),^()
-		{
-			Delegate.shared.projectMode=mode;
-			WindowController.syncProjectMode;
-		});
+		Delegate.shared.projectMode=mode;
+		WindowController.syncProjectMode;
 	}
 }
 

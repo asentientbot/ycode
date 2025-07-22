@@ -33,7 +33,7 @@ int main(int argc,char** argv)
 #ifdef iconMode
 		Settings.reset;
 		
-		CGImageRef image=createThemeAppIcon();
+		CGImageRef image=createAppIcon(getXcodeTheme().sourceTextBackgroundColor.CGColor,getXcodeTheme().sourcePlainTextColor.CGColor,getXcodeTheme().sourceTextCurrentLineHighlightColor.CGColor);
 		NSURL* url=[NSURL fileURLWithPath:@"icon.png"];
 		CGImageDestinationRef destination=CGImageDestinationCreateWithURL((CFURLRef)url,kUTTypePNG,1,NULL);
 		CGImageDestinationAddImage(destination,image,NULL);

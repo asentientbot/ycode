@@ -8,7 +8,7 @@ CGImageRef createAppIcon(CGColorRef background,CGColorRef stroke,CGColorRef fill
 	CGRect rect=CGRectMake(0,0,1024,1024);
 	
 	CGColorSpaceRef space=CGColorSpaceCreateDeviceRGB();
-	CGContextRef context=CGBitmapContextCreate(NULL,1024,1024,8,1024*4,space,kCGImageAlphaPremultipliedFirst);
+	CGContextRef context=CGBitmapContextCreate(NULL,1024,1024,8,1024*4,space,(CGBitmapInfo)kCGImageAlphaPremultipliedFirst);
 	CFRelease(space);
 	
 	// TODO: doesn't precisely match Apple's template, but neither does NSIconGenericApplication, so..

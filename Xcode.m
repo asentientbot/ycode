@@ -45,6 +45,7 @@ Class SoftDocumentLocation;
 -(void)selectDocumentLocations:(NSArray<XcodeDocumentLocation*>*)locations;
 -(NSArray<XcodeDocumentLocation*>*)currentSelectedDocumentLocations;
 -(void)invalidate;
+-(void)takeFocus;
 
 @end
 
@@ -106,8 +107,11 @@ XcodeDocument* getXcodeDocument(NSURL* url,NSString* type)
 XcodeViewController* getXcodeViewController(XcodeDocument* document)
 {
 	XcodeViewController* controller=[(XcodeViewController*)[SoftViewController alloc] initWithNibName:nil bundle:nil document:document].autorelease;
+	
+	// TODO: needed for trimming whitespace to work?
+	
 	controller.fileTextSettings=((NSObject*)[SoftSettings2 alloc]).init.autorelease;
-	controller.view.clipsToBounds=true;
+	
 	return controller;
 }
 
@@ -123,20 +127,7 @@ void focusXcodeViewController(XcodeViewController* controller,NSRange selection)
 	XcodeDocumentLocation* location=[(XcodeDocumentLocation*)[SoftDocumentLocation alloc] initWithDocumentURL:fakeURL timestamp:nil characterRange:selection].autorelease;
 	[controller selectDocumentLocations:@[location]];
 	
-	// TODO: confusing. make a general "recurse views with block" function
-	
-	NSMutableArray<NSView*>* views=NSMutableArray.alloc.init.autorelease;
-	[views addObject:controller.view];
-	for(int index=0;index<views.count;index++)
-	{
-		if(views[index].acceptsFirstResponder)
-		{
-			[views[index].window makeFirstResponder:views[index]];
-			break;
-		}
-		
-		[views addObjectsFromArray:views[index].subviews];
-	}
+	controller.takeFocus;
 }
 
 XcodeSettings* getXcodeSettings()

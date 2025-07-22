@@ -1,11 +1,6 @@
 #define ScratchWidth 600
 #define ScratchHeight 500
 
-CGImageRef createThemeAppIcon()
-{
-	return createAppIcon(getXcodeTheme().sourceTextBackgroundColor.CGColor,getXcodeTheme().sourcePlainTextColor.CGColor,getXcodeTheme().sourceTextCurrentLineHighlightColor.CGColor);
-}
-
 dispatch_once_t windowControllerInitializeOnce;
 
 @implementation WindowController
@@ -87,6 +82,10 @@ dispatch_once_t windowControllerInitializeOnce;
 	self.xcodeViewController.invalidate;
 	self.xcodeViewController=getXcodeViewController(document.xcodeDocument);
 	self.window.contentView=self.xcodeViewController.view;
+	
+	// TODO: hack to load content immediately
+	
+	self.window.display;
 	
 	focusXcodeViewController(self.xcodeViewController,oldSelection);
 }

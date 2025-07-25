@@ -2,6 +2,8 @@
 
 +(void)closeTransientIfNeeded
 {
+	// TODO: still weird
+	
 	NSArray<Document*>* documents=NSDocumentController.sharedDocumentController.documents;
 	if(documents.count!=2)
 	{
@@ -19,6 +21,22 @@
 	}
 }
 
+-(void)setXcodeDocument:(XcodeDocument*)newDocument
+{
+	if(_xcodeDocument)
+	{
+		self.undoManager=nil;
+		
+		[Xcode destroyDocument:_xcodeDocument];
+		
+		_xcodeDocument.release;
+	}
+	
+	_xcodeDocument=newDocument.retain;
+	
+	self.undoManager=_xcodeDocument.undoManager;
+}
+
 -(void)makeWindowControllers
 {
 	if(self.fileURL)
@@ -32,7 +50,9 @@
 
 -(void)loadWithURL:(NSURL*)url
 {
-	NSURL* tempURL=getTempURL();
+	NSString* tempName=[NSString stringWithFormat:@"%@.%ld.txt",getAppName(),(long)(NSDate.date.timeIntervalSince1970*NSEC_PER_SEC)];
+	NSURL* tempURL=[NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:tempName]];
+	
 	NSString* type;
 	if(url)
 	{
@@ -40,6 +60,7 @@
 		{
 			alertAbort(@"copy error");
 		}
+		
 		type=[NSDocumentController.sharedDocumentController typeForContentsOfURL:url error:nil];
 	}
 	else
@@ -48,12 +69,11 @@
 		{
 			alertAbort(@"touch error");
 		}
+		
 		type=self.fileType;
 	}
 	
-	self.xcodeDocument.close;
-	self.xcodeDocument=getXcodeDocument(tempURL,type);
-	self.undoManager=self.xcodeDocument.undoManager;
+	self.xcodeDocument=[Xcode documentWithURL:tempURL type:type];
 	
 	[(WindowController*)self.windowControllers.lastObject replaceDocument:self];
 }
@@ -96,19 +116,7 @@
 {
 	[super restoreStateWithCoder:coder];
 	
-	BOOL mode=[coder decodeBoolForKey:@"projectMode"];
-	if(mode!=Delegate.shared.projectMode)
-	{
-		Delegate.shared.projectMode=mode;
-		WindowController.syncProjectMode;
-	}
-}
-
--(void)close
-{
-	self.xcodeDocument.close;
-	
-	super.close;
+	Delegate.shared.projectMode=[coder decodeBoolForKey:@"projectMode"];
 }
 
 -(void)dealloc

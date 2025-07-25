@@ -1,6 +1,16 @@
-NSString* xcodePath=nil;
+id hackReturnNil()
+{
+	return nil;
+}
 
-NSString* replaceXcodePath(NSString* path)
+NSMenu* hackContextMenu()
+{
+	return contextMenuHook();
+}
+
+@implementation Xcode
+
++(NSString*)replacePath:(NSString*)template
 {
 	if(!xcodePath)
 	{
@@ -11,158 +21,132 @@ NSString* replaceXcodePath(NSString* path)
 		}
 	}
 	
-	return [path stringByReplacingOccurrencesOfString:@"%" withString:xcodePath];
+	return [template stringByReplacingOccurrencesOfString:@"%" withString:xcodePath];
 }
 
-void (*SoftInitialize)(int,NSError**);
-Class SoftDocument;
-Class SoftViewController;
-Class SoftTheme;
-Class SoftTheme2;
-Class SoftSettings;
-Class SoftSettings2;
-Class SoftDocumentLocation;
-
-@interface XcodeDocument:NSDocument
-
--(instancetype)initWithContentsOfURL:(NSURL*)url ofType:(NSString*)type error:(NSError**)error;
-
-@end
-
-@interface XcodeDocumentLocation:NSObject
-
--(instancetype)initWithDocumentURL:(NSURL*)url timestamp:(NSNumber*)timestamp characterRange:(NSRange)range;
--(NSRange)characterRange;
-
-@end
-
-@interface XcodeViewController:NSViewController
-
-@property(retain) NSObject* representedExtension;
-@property(retain) NSObject* fileTextSettings;
-
--(instancetype)initWithNibName:(NSString*)nib bundle:(NSBundle*)bundle document:(NSDocument*)document;
--(void)selectDocumentLocations:(NSArray<XcodeDocumentLocation*>*)locations;
--(NSArray<XcodeDocumentLocation*>*)currentSelectedDocumentLocations;
--(void)invalidate;
--(void)takeFocus;
-
-@end
-
-@interface XcodeSettings:NSObject
-
-+(instancetype)sharedPreferences;
-
-@end
-
-@class XcodeThemeManager;
-
-#define XcodeThemeBackgroundKey @"DVTSourceTextBackground"
-#define XcodeThemeHighlightKey @"DVTSourceTextCurrentLineHighlightColor"
-#define XcodeThemeSelectionKey @"DVTSourceTextSelectionColor"
-#define XcodeThemeCursorKey @"DVTSourceTextInsertionPointColor"
-#define XcodeThemeInvisiblesKey @"DVTSourceTextInvisiblesColor"
-#define XcodeThemeMarkdownCodeKey @"DVTMarkupTextInlineCodeColor"
-
-#define XcodeThemeFontsKey @"DVTSourceTextSyntaxFonts"
-#define XcodeThemeColorsKey @"DVTSourceTextSyntaxColors"
-#define XcodeThemeCommentKeys @[@"xcode.syntax.comment",@"xcode.syntax.comment.doc",@"xcode.syntax.comment.doc.keyword",@"xcode.syntax.mark",@"xcode.syntax.url"]
-#define XcodeThemePreprocessorKeys @[@"xcode.syntax.preprocessor"]
-#define XcodeThemeClassKeys @[@"xcode.syntax.declaration.type"]
-#define XcodeThemeFunctionKeys @[@"xcode.syntax.declaration.other",@"xcode.syntax.attribute"]
-#define XcodeThemeKeywordKeys @[@"xcode.syntax.keyword"]
-#define XcodeThemeStringKeys @[@"xcode.syntax.string"]
-#define XcodeThemeNumberKeys @[@"xcode.syntax.number",@"xcode.syntax.character"]
-
-@interface XcodeTheme2:NSObject
-
-+(XcodeThemeManager*)preferenceSetsManager;
--(NSString*)localizedName;
--(NSString*)name;
--(BOOL)hasLightBackground;
--(NSColor*)sourceTextBackgroundColor;
--(NSColor*)sourceTextCurrentLineHighlightColor;
--(NSColor*)sourceTextSelectionColor;
--(NSColor*)sourcePlainTextColor;
-
-@end
-
-#define XcodeLightThemeKey @"XCFontAndColorCurrentTheme"
-#define XcodeDarkThemeKey @"XCFontAndColorCurrentDarkTheme"
-#define XcodeThemeChangedKey @"DVTFontAndColorSettingsChangedNotification"
-
-@interface XcodeThemeManager:NSObject
-
-@property(retain) XcodeTheme2* currentPreferenceSet;
-
--(NSArray<XcodeTheme2*>*)availablePreferenceSets;
-
-@end
-
-XcodeDocument* getXcodeDocument(NSURL* url,NSString* type)
++(XcodeDocument*)documentWithURL:(NSURL*)url type:(NSString*)type
 {
-	return [(XcodeDocument*)[SoftDocument alloc] initWithContentsOfURL:url ofType:type error:nil].autorelease;
+	return [(XcodeDocument*)SoftDocument.alloc initWithContentsOfURL:url ofType:type error:nil].autorelease;
 }
 
-XcodeViewController* getXcodeViewController(XcodeDocument* document)
++(void)destroyDocument:(XcodeDocument*)document
 {
-	XcodeViewController* controller=[(XcodeViewController*)[SoftViewController alloc] initWithNibName:nil bundle:nil document:document].autorelease;
+	document.retain;
 	
-	// TODO: needed for trimming whitespace to work?
+	dispatch_async(dispatch_get_main_queue(),^()
+	{
+		document.close;
+		document.release;
+	});
+}
+
++(XcodeViewController*)viewControllerWithDocument:(XcodeDocument*)document
+{
+	XcodeViewController* controller=[(XcodeViewController*)SoftViewController.alloc initWithNibName:nil bundle:nil document:document].autorelease;
 	
-	controller.fileTextSettings=((NSObject*)[SoftSettings2 alloc]).init.autorelease;
+	// TODO: needed for trimming whitespace, weird
+	
+	controller.fileTextSettings=((NSObject*)SoftSettings2.alloc).init.autorelease;
 	
 	return controller;
 }
 
-NSRange getXcodeViewControllerSelection(XcodeViewController* controller)
++(NSRange)selectionWithViewController:(XcodeViewController*)controller
 {
 	XcodeDocumentLocation* location=controller.currentSelectedDocumentLocations.firstObject;
 	return location?location.characterRange:NSMakeRange(0,0);
 }
 
-void focusXcodeViewController(XcodeViewController* controller,NSRange selection)
++(void)focusViewController:(XcodeViewController*)controller withSelection:(NSRange)selection
 {
 	NSURL* fakeURL=[NSURL.alloc initWithString:@""].autorelease;
-	XcodeDocumentLocation* location=[(XcodeDocumentLocation*)[SoftDocumentLocation alloc] initWithDocumentURL:fakeURL timestamp:nil characterRange:selection].autorelease;
+	XcodeDocumentLocation* location=[(XcodeDocumentLocation*)SoftDocumentLocation.alloc initWithDocumentURL:fakeURL timestamp:nil characterRange:selection].autorelease;
 	[controller selectDocumentLocations:@[location]];
+	
+	// TODO: hack to load views in time for takeFocus
+		
+	controller.view.window.display;
 	
 	controller.takeFocus;
 }
 
-XcodeSettings* getXcodeSettings()
++(void)destroyViewController:(XcodeViewController*)controller
+{
+	// TODO: fixes a memory leak closing tabs (not windows)
+	
+	assert(controller.view.window);
+	controller.view.display;
+	
+	controller.view.removeFromSuperview;
+	controller.invalidate;
+}
+
++(XcodeSettings*)settings
 {
 	return [SoftSettings sharedPreferences];
 }
 
-XcodeThemeManager* getXcodeThemeManager()
++(NSArray<XcodeTheme2*>*)themes
 {
-	return [SoftTheme2 preferenceSetsManager];
+	return [SoftTheme2 preferenceSetsManager].availablePreferenceSets;
 }
 
-NSArray<XcodeTheme2*>* getXcodeThemes()
++(NSArray<NSString*>*)themeNames
 {
-	return getXcodeThemeManager().availablePreferenceSets;
+	NSArray<NSString*>* names=[Xcode.themes valueForKey:@"localizedName"];
+	return [names sortedArrayUsingSelector:@selector(compare:)];
 }
 
-XcodeTheme2* getXcodeTheme()
++(XcodeTheme2*)theme
 {
-	return getXcodeThemeManager().currentPreferenceSet;
+	return [SoftTheme2 preferenceSetsManager].currentPreferenceSet;
 }
 
-void setXcodeTheme(XcodeTheme2* theme)
++(NSString*)themeName
 {
-	getXcodeThemeManager().currentPreferenceSet=theme;
+	return Xcode.theme.localizedName;
+}
+
++(BOOL)themeIsLight
+{
+	return Xcode.theme.hasLightBackground;
+}
+
++(void)setTheme:(XcodeTheme2*)theme
+{
+	[SoftTheme2 preferenceSetsManager].currentPreferenceSet=theme;
 	
 	[NSUserDefaults.standardUserDefaults setObject:theme.name forKey:XcodeLightThemeKey];
 	[NSUserDefaults.standardUserDefaults setObject:theme.name forKey:XcodeDarkThemeKey];
 }
 
-NSString* getXcodeSystemThemesPath()
++(void)setThemeName:(NSString*)name
 {
-	for(NSString* format in @[@"%/Contents/SharedFrameworks/DVTUserInterfaceKit.framework/Versions/A/Resources/FontAndColorThemes",@"%/Contents/SharedFrameworks/DVTKit.framework/Versions/A/Resources/FontAndColorThemes"])
+	XcodeTheme2* matched=nil;
+	
+	for(XcodeTheme2* theme in Xcode.themes)
 	{
-		NSString* path=replaceXcodePath(format);
+		if([theme.localizedName isEqual:name])
+		{
+			matched=theme;
+			break;
+		}
+	}
+	
+	if(!matched)
+	{
+		alert(@"theme missing");
+		return;
+	}
+	
+	Xcode.theme=matched;
+}
+
++(NSString*)systemThemesPath
+{
+	for(NSString* template in @[@"%/Contents/SharedFrameworks/DVTUserInterfaceKit.framework/Versions/A/Resources/FontAndColorThemes",@"%/Contents/SharedFrameworks/DVTKit.framework/Versions/A/Resources/FontAndColorThemes"])
+	{
+		NSString* path=[Xcode replacePath:template];
 		if([NSFileManager.defaultManager fileExistsAtPath:path])
 		{
 			return path;
@@ -172,18 +156,106 @@ NSString* getXcodeSystemThemesPath()
 	alertAbort(@"system themes folder missing");
 }
 
-NSString* getXcodeUserThemesPath()
++(NSString*)userThemesPath
 {
-	return [NSHomeDirectory() stringByAppendingPathComponent:@"Library/Developer/Xcode/UserData/FontAndColorThemes"];
+	return @"~/Library/Developer/Xcode/UserData/FontAndColorThemes".stringByExpandingTildeInPath;
 }
 
-NSMenu* (^contextMenuHook)()=NULL;
-NSMenu* hackContextMenu()
++(void)saveThemeWithName:(NSString*)name backgroundColor:(NSString*)backgroundColor highlightColor:(NSString*)highlightColor selectionColor:(NSString*)selectionColor defaultFont:(NSString*)defaultFont defaultColor:(NSString*)defaultColor commentFont:(NSString*)commentFont commentColor:(NSString*)commentColor preprocessorFont:(NSString*)preprocessorFont preprocessorColor:(NSString*)preprocessorColor classFont:(NSString*)classFont classColor:(NSString*)classColor functionFont:(NSString*)functionFont functionColor:(NSString*)functionColor keywordFont:(NSString*)keywordFont keywordColor:(NSString*)keywordColor stringFont:(NSString*)stringFont stringColor:(NSString*)stringColor numberFont:(NSString*)numberFont numberColor:(NSString*)numberColor
 {
-	return contextMenuHook();
+	NSString* basePath=[Xcode.systemThemesPath stringByAppendingPathComponent:@"Default (Light).xccolortheme"];
+	NSData* baseData=[NSData dataWithContentsOfFile:basePath];
+	if(!baseData)
+	{
+		alertAbort(@"base theme missing");
+	}
+	
+	NSMutableDictionary* custom=[NSPropertyListSerialization propertyListWithData:baseData options:NSPropertyListMutableContainers format:nil error:nil];
+	if(!custom)
+	{
+		alertAbort(@"base theme broken");
+	}
+	
+	custom[XcodeThemeBackgroundKey]=backgroundColor;
+	custom[XcodeThemeHighlightKey]=highlightColor;
+	custom[XcodeThemeSelectionKey]=selectionColor;
+	custom[XcodeThemeCursorKey]=defaultColor;
+	custom[XcodeThemeInvisiblesKey]=commentColor;
+	custom[XcodeThemeMarkdownCodeKey]=stringColor;
+	
+	NSMutableDictionary* innerFonts=custom[XcodeThemeFontsKey];
+	NSMutableDictionary* innerColors=custom[XcodeThemeColorsKey];
+	for(NSString* key in innerColors.allKeys)
+	{
+		NSString* font=defaultFont;
+		NSString* color=defaultColor;
+		
+		if([XcodeThemeCommentKeys containsObject:key])
+		{
+			font=commentFont;
+			color=commentColor;
+		}
+		else if([XcodeThemePreprocessorKeys containsObject:key])
+		{
+			font=preprocessorFont;
+			color=preprocessorColor;
+		}
+		else if([XcodeThemeClassKeys containsObject:key])
+		{
+			font=classFont;
+			color=classColor;
+		}
+		else if([XcodeThemeFunctionKeys containsObject:key])
+		{
+			font=functionFont;
+			color=functionColor;
+		}
+		else if([XcodeThemeKeywordKeys containsObject:key])
+		{
+			font=keywordFont;
+			color=keywordColor;
+		}
+		else if([XcodeThemeStringKeys containsObject:key])
+		{
+			font=stringFont;
+			color=stringColor;
+		}
+		else if([XcodeThemeNumberKeys containsObject:key])
+		{
+			font=numberFont;
+			color=numberColor;
+		}
+		
+		innerFonts[key]=font;
+		innerColors[key]=color;
+	}
+	
+	NSString* customPath=[Xcode.userThemesPath stringByAppendingPathComponent:[name stringByAppendingString:@".xccolortheme"]];
+	[NSFileManager.defaultManager createDirectoryAtPath:customPath.stringByDeletingLastPathComponent withIntermediateDirectories:true attributes:nil error:nil];
+	
+	NSData* customData=[NSPropertyListSerialization dataWithPropertyList:custom format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
+	if(![customData writeToFile:customPath atomically:true])
+	{
+		alertAbort(@"theme write failed");
+	}
 }
 
-void linkLibrary(NSString* path)
++(void)addThemeChangeHandler:(void (^)())handler
+{
+	void (^leakedHandler)()=[handler copy];
+	
+	[NSNotificationCenter.defaultCenter addObserverForName:XcodeThemeChangedKey object:nil queue:nil usingBlock:^(NSNotification* note)
+	{
+		leakedHandler();
+	}];
+}
+
++(void)setContextMenuHook:(NSMenu* (^)())block
+{
+	contextMenuHook=[block copy];
+}
+
++(void)linkLibrary:(NSString*)path
 {
 	if(!dlopen(path.UTF8String,RTLD_LAZY))
 	{
@@ -191,38 +263,70 @@ void linkLibrary(NSString* path)
 	}
 }
 
-void linkSymbol(NSString* name,void** pointer)
++(void*)linkSymbol:(NSString*)name
 {
 	void* symbol=dlsym(RTLD_DEFAULT,name.UTF8String);
 	if(!symbol)
 	{
 		alertAbort([NSString stringWithFormat:@"dlsym failed: %s",dlerror()]);
 	}
-	*pointer=symbol;
-}
-
-void linkClass(NSString* name,Class* pointer)
-{
-	linkSymbol([NSString stringWithFormat:@"OBJC_CLASS_$_%@",name],(void**)pointer);
-}
-
-void linkXcode()
-{
-	linkLibrary(replaceXcodePath(@"%/Contents/PlugIns/IDESourceEditor.framework/Versions/A/IDESourceEditor"));
 	
-	linkSymbol(@"IDEInitialize",(void**)&SoftInitialize);
-	linkClass(@"_TtC15IDESourceEditor18SourceCodeDocument",&SoftDocument);
-	linkClass(@"_TtC15IDESourceEditor16SourceCodeEditor",&SoftViewController);
-	linkClass(@"DVTTheme",&SoftTheme);
-	linkClass(@"DVTFontAndColorTheme",&SoftTheme2);
-	linkClass(@"DVTTextPreferences",&SoftSettings);
-	linkClass(@"IDEFileTextSettings",&SoftSettings2);
-	linkClass(@"DVTTextDocumentLocation",&SoftDocumentLocation);
+	return symbol;
+}
+
++(Class)linkClass:(NSString*)name
+{
+	return [Xcode linkSymbol:[NSString stringWithFormat:@"OBJC_CLASS_$_%@",name]];
+}
+
++(IMP)swizzleWithClass:(NSString*)className selector:(NSString*)selName isInstance:(BOOL)isInstance implementation:(IMP)newImp
+{
+	Class class=NSClassFromString(className);
+	if(!class)
+	{
+		alertAbort(@"swizzle class missing");
+	}
+	
+	SEL sel=NSSelectorFromString(selName);
+	Method method=(isInstance?class_getInstanceMethod:class_getClassMethod)(class,sel);
+	if(!method)
+	{
+		alertAbort(@"swizzle method missing");
+	}
+	
+	return method_setImplementation(method,newImp);
+}
+
++(void)setupWithArgv:(char**)argv
+{
+	// TODO: case where it's already set? maybe we should instead check if IDESourceEditor fails to load?
+	
+	if(!getenv("DYLD_FRAMEWORK_PATH"))
+	{
+		NSString* dylibPaths=[Xcode replacePath:@"%/Contents/Frameworks:%/Contents/SharedFrameworks:%/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks:%/Contents/Developer/Library/Frameworks"];
+		setenv("DYLD_FRAMEWORK_PATH",dylibPaths.UTF8String,true);
+		setenv("DYLD_LIBRARY_PATH",dylibPaths.UTF8String,true);
+		execv(argv[0],argv);
+		
+		alertAbort(@"re-exec failed");
+	}
+	
+	[Xcode linkLibrary:[Xcode replacePath:@"%/Contents/PlugIns/IDESourceEditor.framework/Versions/A/IDESourceEditor"]];
+	
+	SoftInitialize=[Xcode linkSymbol:@"IDEInitialize"];
+	
+	SoftDocument=[Xcode linkClass:@"_TtC15IDESourceEditor18SourceCodeDocument"];
+	SoftViewController=[Xcode linkClass:@"_TtC15IDESourceEditor16SourceCodeEditor"];
+	SoftTheme=[Xcode linkClass:@"DVTTheme"];
+	SoftTheme2=[Xcode linkClass:@"DVTFontAndColorTheme"];
+	SoftSettings=[Xcode linkClass:@"DVTTextPreferences"];
+	SoftSettings2=[Xcode linkClass:@"IDEFileTextSettings"];
+	SoftDocumentLocation=[Xcode linkClass:@"DVTTextDocumentLocation"];
 	
 	// TODO: stupid
 	
-	swizzle(@"IDEDocumentController",@"sharedDocumentController",false,(IMP)returnNil,NULL);
-	swizzle(@"_TtC12SourceEditor16SourceEditorView",@"menuForEvent:",true,(IMP)hackContextMenu,NULL);
+	[Xcode swizzleWithClass:@"IDEDocumentController" selector:@"sharedDocumentController" isInstance:false implementation:(IMP)hackReturnNil];
+	[Xcode swizzleWithClass:@"_TtC12SourceEditor16SourceEditorView" selector:@"menuForEvent:" isInstance:true implementation:(IMP)hackContextMenu];
 	
 	// TODO: aborts if Xcode present but never opened
 	
@@ -241,17 +345,4 @@ void linkXcode()
 	// TODO: source control sidebar?
 }
 
-void restartIfNeeded(char** argv)
-{
-	// TODO: case where it's already set? maybe we should instead check if IDESourceEditor fails to load?
-	
-	if(!getenv("DYLD_FRAMEWORK_PATH"))
-	{
-		NSString* dylibPaths=replaceXcodePath(@"%/Contents/Frameworks:%/Contents/SharedFrameworks:%/Contents/Developer/Platforms/MacOSX.platform/Developer/Library/Frameworks:%/Contents/Developer/Library/Frameworks");
-		setenv("DYLD_FRAMEWORK_PATH",dylibPaths.UTF8String,true);
-		setenv("DYLD_LIBRARY_PATH",dylibPaths.UTF8String,true);
-		execv(argv[0],argv);
-		
-		alertAbort(@"re-exec failed");
-	}
-}
+@end

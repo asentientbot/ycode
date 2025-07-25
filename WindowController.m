@@ -1,20 +1,4 @@
-#define ScratchWidth 600
-#define ScratchHeight 500
-
-dispatch_once_t windowControllerInitializeOnce;
-
 @implementation WindowController
-
-+(void)initialize
-{
-	dispatch_once(&windowControllerInitializeOnce,^()
-	{
-		[NSNotificationCenter.defaultCenter addObserverForName:XcodeThemeChangedKey object:nil queue:nil usingBlock:^(NSNotification* note)
-		{
-			[WindowController.allInstances makeObjectsPerformSelector:@selector(syncTheme)];
-		}];
-	});
-}
 
 +(NSArray<WindowController*>*)allInstances
 {
@@ -23,6 +7,7 @@ dispatch_once_t windowControllerInitializeOnce;
 	{
 		[result addObjectsFromArray:document.windowControllers];
 	}
+	
 	return result;
 }
 
@@ -58,6 +43,11 @@ dispatch_once_t windowControllerInitializeOnce;
 	});
 }
 
++(void)syncTheme
+{
+	[WindowController.allInstances makeObjectsPerformSelector:@selector(syncTheme)];
+}
+
 -(instancetype)init
 {
 	self=super.init;
@@ -65,6 +55,7 @@ dispatch_once_t windowControllerInitializeOnce;
 	NSWindowStyleMask style=NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable;
 	self.window=[NSWindow.alloc initWithContentRect:CGRectZero styleMask:style backing:NSBackingStoreBuffered defer:false].autorelease;
 	self.window.delegate=Delegate.shared;
+	
 	[self syncProjectModeWithPrevious:WindowController.lastInstance];
 	
 	self.syncTheme;
@@ -72,22 +63,30 @@ dispatch_once_t windowControllerInitializeOnce;
 	return self;
 }
 
+-(void)setXcodeViewController:(XcodeViewController*)newController
+{
+	NSRange oldSelection=[Xcode selectionWithViewController:_xcodeViewController];
+	
+	if(_xcodeViewController)
+	{
+		[Xcode destroyViewController:_xcodeViewController];
+		
+		_xcodeViewController.release;
+	}
+	
+	_xcodeViewController=newController.retain;
+	
+	self.window.contentView=_xcodeViewController.view;
+	
+	if(_xcodeViewController)
+	{
+		[Xcode focusViewController:_xcodeViewController withSelection:oldSelection];
+	}
+}
+
 -(void)replaceDocument:(Document*)document
 {
-	NSRange oldSelection=getXcodeViewControllerSelection(self.xcodeViewController);
-	
-	// TODO: this and the similar copy+pasted dealloc code in Document.m should be moved somewhere else, probably Xcode.m or custom property setter
-	
-	self.window.contentView=nil;
-	self.xcodeViewController.invalidate;
-	self.xcodeViewController=getXcodeViewController(document.xcodeDocument);
-	self.window.contentView=self.xcodeViewController.view;
-	
-	// TODO: hack to load content immediately
-	
-	self.window.display;
-	
-	focusXcodeViewController(self.xcodeViewController,oldSelection);
+	self.xcodeViewController=[Xcode viewControllerWithDocument:document.xcodeDocument];
 }
 
 -(void)syncProjectModeWithPrevious:(WindowController*)previous
@@ -127,7 +126,7 @@ dispatch_once_t windowControllerInitializeOnce;
 {
 	dispatch_async(dispatch_get_main_queue(),^()
 	{
-		NSAppearance* appearance=[NSAppearance appearanceNamed:getXcodeTheme().hasLightBackground?NSAppearanceNameAqua:NSAppearanceNameVibrantDark];
+		NSAppearance* appearance=[NSAppearance appearanceNamed:Xcode.themeIsLight?NSAppearanceNameAqua:NSAppearanceNameVibrantDark];
 		if(@available(macOS 10.14,*))
 		{
 			NSApp.appearance=appearance;
@@ -141,11 +140,6 @@ dispatch_once_t windowControllerInitializeOnce;
 
 -(void)dealloc
 {
-	// TODO: idk exactly what this does, but it fixes the memory leak. empirically, XcodeViewController.invalidate and XcodeDocument.close are both needed in addition to releasing normally
-	
-	self.window.contentView=nil;
-	self.xcodeViewController.invalidate;
-	
 	self.xcodeViewController=nil;
 	
 	super.dealloc;

@@ -9,14 +9,15 @@
 // TODO: lol
 
 #import "Utils.m"
-#import "Xcode.m"
 
+#import "Xcode.h"
 #import "SettingsMapping.h"
 #import "Settings.h"
 #import "Document.h"
 #import "WindowController.h"
 #import "Delegate.h"
 
+#import "Xcode.m"
 #import "SettingsMapping.m"
 #import "Settings.m"
 #import "Document.m"
@@ -27,21 +28,11 @@ int main(int argc,char** argv)
 {
 	@autoreleasepool
 	{
-		restartIfNeeded(argv);
-		linkXcode();
-		
 #ifdef iconMode
-		Settings.reset;
-		
-		CGImageRef image=createAppIcon(getXcodeTheme().sourceTextBackgroundColor.CGColor,getXcodeTheme().sourcePlainTextColor.CGColor,getXcodeTheme().sourceTextCurrentLineHighlightColor.CGColor);
-		NSURL* url=[NSURL fileURLWithPath:@"icon.png"];
-		CGImageDestinationRef destination=CGImageDestinationCreateWithURL((CFURLRef)url,kUTTypePNG,1,NULL);
-		CGImageDestinationAddImage(destination,image,NULL);
-		CGImageDestinationFinalize(destination);
-		
-		CFRelease(image);
-		CFRelease(destination);
+		Settings.saveAppIcon;
 #else
+		[Xcode setupWithArgv:argv];
+		
 		NSApplication.sharedApplication.delegate=Delegate.alloc.init;
 		NSApp.run;
 #endif

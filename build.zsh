@@ -14,10 +14,11 @@ then
 fi
 
 rm -rf "$name.app" "$name.zip" icon.iconset
+
 mkdir -p "$name.app/Contents/MacOS"
 mkdir -p "$name.app/Contents/Resources"
 
-clang -fmodules -mmacosx-version-min=$minVersion -arch x86_64 -arch arm64 -DgitHash=$(git log -1 --format=%H) main.m -o "$name.app/Contents/MacOS/$name"
+clang -fmodules -mmacosx-version-min=$minVersion -arch x86_64 -arch arm64 -D gitHash=$(git log -1 --format=%H) main.m -o "$name.app/Contents/MacOS/$name"
 
 clang -fmodules -D iconMode main.m -o icon
 ./icon
@@ -28,7 +29,10 @@ do
 	sips -Z $size icon.png --out icon.iconset/icon_${size}x${size}.png
 	sips -Z $(($size*2)) icon.png --out icon.iconset/icon_${size}x${size}@2x.png
 done
+
 iconutil -c icns icon.iconset -o "$name.app/Contents/Resources/Icon.icns"
+
+rm -r icon icon.png icon.iconset
 
 echo "add CFBundleExecutable string $name
 add CFBundleIdentifier string $id
@@ -45,21 +49,16 @@ do
 	/usr/libexec/PlistBuddy "$name.app/Contents/Info.plist" -c "$command"
 done
 
-codesign -f -s - "$name.app"
-
-if [[ $1 != test ]]
-then
-	zip -r "$name.zip" "$name.app"
-fi
-
-rm -rf icon icon.png icon.iconset ~'/Library/Developer/Xcode/UserData/FontAndColorThemes/icon.xccolortheme'
+codesign -fs - "$name.app"
 
 if [[ $1 == test ]]
 then
 	set +e
 	
 	defaults delete $id
-	rm ~"/Library/Developer/Xcode/UserData/FontAndColorThemes/$name.xccolortheme"
+	rm ~/Library/Developer/Xcode/UserData/FontAndColorThemes/"$name".xccolortheme
 	
 	"$name.app/Contents/MacOS/$name"
+else
+	zip -r "$name.zip" "$name.app"
 fi

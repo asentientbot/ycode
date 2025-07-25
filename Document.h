@@ -1,5 +1,5 @@
 @interface Document:NSDocument
 
-@property(retain) XcodeDocument* xcodeDocument;
+@property(retain,nonatomic) XcodeDocument* xcodeDocument;
 
 @end

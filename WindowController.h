@@ -1,8 +1,10 @@
+#define ScratchWidth 600
+#define ScratchHeight 500
+
 @interface WindowController:NSWindowController
 
-@property(retain) XcodeViewController* xcodeViewController;
+@property(retain,nonatomic) XcodeViewController* xcodeViewController;
 
-+(void)syncProjectMode;
 -(void)replaceDocument:(Document*)document;
 
 @end

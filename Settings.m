@@ -1,6 +1,6 @@
 @implementation Settings
 
-+(NSArray<SettingsMapping*>*)allMappings
++(NSArray<SettingsMapping*>*)mappings
 {
 	// TODO: implement numeric settings, cases that need reload currently, etc
 	
@@ -26,14 +26,14 @@
 	];
 }
 
-+(NSArray<NSString*>*)allMappingNames
++(NSArray<NSString*>*)mappingNames
 {
-	return [Settings.allMappings valueForKey:@"name"];
+	return [Settings.mappings valueForKey:@"name"];
 }
 
 +(SettingsMapping*)mappingWithName:(NSString*)name
 {
-	for(SettingsMapping* mapping in Settings.allMappings)
+	for(SettingsMapping* mapping in Settings.mappings)
 	{
 		if([mapping.name isEqual:name])
 		{
@@ -42,39 +42,6 @@
 	}
 	
 	return nil;
-}
-
-+(NSArray<NSString*>*)allThemeNames
-{
-	NSArray<NSString*>* names=[getXcodeThemes() valueForKeyPath:@"localizedName"];
-	return [names sortedArrayUsingSelector:@selector(compare:)];
-}
-
-+(NSString*)currentThemeName
-{
-	return getXcodeTheme().localizedName;
-}
-
-+(void)setCurrentThemeName:(NSString*)name
-{
-	XcodeTheme2* matched=nil;
-	
-	for(XcodeTheme2* theme in getXcodeThemes())
-	{
-		if([theme.localizedName isEqual:name])
-		{
-			matched=theme;
-			break;
-		}
-	}
-	
-	if(!matched)
-	{
-		alert(@"theme missing");
-		return;
-	}
-	
-	setXcodeTheme(matched);
 }
 
 +(NSString*)screenKey
@@ -123,103 +90,101 @@
 	return [Settings rectWithPrefix:@"project"];
 }
 
-+(void)saveThemeWithName:(NSString*)name backgroundColor:(NSString*)backgroundColor highlightColor:(NSString*)highlightColor selectionColor:(NSString*)selectionColor defaultFont:(NSString*)defaultFont defaultColor:(NSString*)defaultColor commentFont:(NSString*)commentFont commentColor:(NSString*)commentColor preprocessorFont:(NSString*)preprocessorFont preprocessorColor:(NSString*)preprocessorColor classFont:(NSString*)classFont classColor:(NSString*)classColor functionFont:(NSString*)functionFont functionColor:(NSString*)functionColor keywordFont:(NSString*)keywordFont keywordColor:(NSString*)keywordColor stringFont:(NSString*)stringFont stringColor:(NSString*)stringColor numberFont:(NSString*)numberFont numberColor:(NSString*)numberColor
++(BOOL)showedProjectModeExplanation
 {
-	NSString* basePath=[getXcodeSystemThemesPath() stringByAppendingPathComponent:@"Default (Light).xccolortheme"];
-	NSData* baseData=[NSData dataWithContentsOfFile:basePath];
-	if(!baseData)
-	{
-		alertAbort(@"base theme missing");
-	}
-	
-	NSMutableDictionary* custom=[NSPropertyListSerialization propertyListWithData:baseData options:NSPropertyListMutableContainers format:nil error:nil];
-	if(!custom)
-	{
-		alertAbort(@"base theme broken");
-	}
-	
-	custom[XcodeThemeBackgroundKey]=backgroundColor;
-	custom[XcodeThemeHighlightKey]=highlightColor;
-	custom[XcodeThemeSelectionKey]=selectionColor;
-	custom[XcodeThemeCursorKey]=defaultColor;
-	custom[XcodeThemeInvisiblesKey]=commentColor;
-	custom[XcodeThemeMarkdownCodeKey]=stringColor;
-	
-	NSMutableDictionary* innerFonts=custom[XcodeThemeFontsKey];
-	NSMutableDictionary* innerColors=custom[XcodeThemeColorsKey];
-	for(NSString* key in innerColors.allKeys)
-	{
-		NSString* font=defaultFont;
-		NSString* color=defaultColor;
-		
-		if([XcodeThemeCommentKeys containsObject:key])
-		{
-			font=commentFont;
-			color=commentColor;
-		}
-		else if([XcodeThemePreprocessorKeys containsObject:key])
-		{
-			font=preprocessorFont;
-			color=preprocessorColor;
-		}
-		else if([XcodeThemeClassKeys containsObject:key])
-		{
-			font=classFont;
-			color=classColor;
-		}
-		else if([XcodeThemeFunctionKeys containsObject:key])
-		{
-			font=functionFont;
-			color=functionColor;
-		}
-		else if([XcodeThemeKeywordKeys containsObject:key])
-		{
-			font=keywordFont;
-			color=keywordColor;
-		}
-		else if([XcodeThemeStringKeys containsObject:key])
-		{
-			font=stringFont;
-			color=stringColor;
-		}
-		else if([XcodeThemeNumberKeys containsObject:key])
-		{
-			font=numberFont;
-			color=numberColor;
-		}
-		
-		innerFonts[key]=font;
-		innerColors[key]=color;
-	}
-	
-	NSString* customPath=[getXcodeUserThemesPath() stringByAppendingPathComponent:[name stringByAppendingString:@".xccolortheme"]];
-	[NSFileManager.defaultManager createDirectoryAtPath:customPath.stringByDeletingLastPathComponent withIntermediateDirectories:true attributes:nil error:nil];
-	
-	NSData* customData=[NSPropertyListSerialization dataWithPropertyList:custom format:NSPropertyListXMLFormat_v1_0 options:0 error:nil];
-	if(![customData writeToFile:customPath atomically:true])
-	{
-		alertAbort(@"theme write failed");
-	}
+	return [NSUserDefaults.standardUserDefaults boolForKey:@"showed project mode explanation"];
 }
 
-+(void)saveSimpleThemeWithName:(NSString*)name background:(NSString*)backgroundColor highlight:(NSString*)highlightColor selection:(NSString*)selectionColor normal:(NSString*)normalColor meta:(NSString*)metaColor type:(NSString*)typeColor keyword:(NSString*)keywordColor string:(NSString*)stringColor number:(NSString*)numberColor
++(void)setShowedProjectModeExplanation:(BOOL)value
 {
-	NSString* regular=@"SFMono-Regular - 13.0";
-	NSString* italic=@"SFMono-RegularItalic - 13.0";
-	NSString* bold=@"SFMono-Bold - 13.0";
-	
-	[Settings saveThemeWithName:name backgroundColor:backgroundColor highlightColor:highlightColor selectionColor:selectionColor defaultFont:regular defaultColor:normalColor commentFont:italic commentColor:metaColor preprocessorFont:regular preprocessorColor:metaColor classFont:bold classColor:typeColor functionFont:bold functionColor:typeColor keywordFont:bold keywordColor:keywordColor stringFont:bold stringColor:stringColor numberFont:bold numberColor:numberColor];
+	[NSUserDefaults.standardUserDefaults setBool:value forKey:@"showed project mode explanation"];
 }
+
 
 +(void)reset
 {
-	for(SettingsMapping* mapping in Settings.allMappings)
+	for(SettingsMapping* mapping in Settings.mappings)
 	{
 		mapping.reset;
 	}
 	
-	[Settings saveSimpleThemeWithName:getAppName() background:@"1 1 1" highlight:@"0.95 0.925 1" selection:@"0.85 0.775 1" normal:@"0.4 0.3 0.7" meta:@"0.6 0.5 0.9" type:@"0.5 0.2 0.8" keyword:@"0.7 0.2 0.8" string:@"0.85 0.35 1" number:@"0.45 0.3 1"];
-	[Settings setCurrentThemeName:getAppName()];
+	[Xcode saveThemeWithName:getAppName() backgroundColor:AmyThemeBackgroundColor highlightColor:AmyThemeHighlightColor selectionColor:AmyThemeSelectionColor defaultFont:AmyThemeRegularFont defaultColor:AmyThemeNormalColor commentFont:AmyThemeItalicFont commentColor:AmyThemeMetaColor preprocessorFont:AmyThemeRegularFont preprocessorColor:AmyThemeMetaColor classFont:AmyThemeBoldFont classColor:AmyThemeTypeColor functionFont:AmyThemeBoldFont functionColor:AmyThemeTypeColor keywordFont:AmyThemeBoldFont keywordColor:AmyThemeKeywordColor stringFont:AmyThemeBoldFont stringColor:AmyThemeStringColor numberFont:AmyThemeBoldFont numberColor:AmyThemeNumberColor];
+	Xcode.themeName=getAppName();
+	
+	Settings.showedProjectModeExplanation=false;
+}
+
++(void)checkFirstRun
+{
+	if(![NSUserDefaults.standardUserDefaults boolForKey:@"launched"])
+	{
+		[NSUserDefaults.standardUserDefaults setBool:true forKey:@"launched"];
+		
+		Settings.reset;
+	}
+}
+
++(CGColorRef)createColorWithString:(NSString*)string
+{
+	NSArray<NSString*>* bits=[string componentsSeparatedByString:@" "];
+	
+	CGFloat red=bits[0].doubleValue;
+	CGFloat green=bits[1].doubleValue;
+	CGFloat blue=bits[2].doubleValue;
+	CGFloat alpha=bits.count==4?bits[3].doubleValue:1;
+	
+	return CGColorCreateGenericRGB(red,green,blue,alpha);
+}
+
++(void)saveAppIcon
+{
+	CGColorRef backgroundColor=[Settings createColorWithString:AmyThemeBackgroundColor];
+	CGColorRef strokeColor=[Settings createColorWithString:AmyThemeNormalColor];
+	CGColorRef fillColor=[Settings createColorWithString:AmyThemeHighlightColor];
+	
+	CGRect rect=CGRectMake(0,0,1024,1024);
+	
+	CGColorSpaceRef space=CGColorSpaceCreateDeviceRGB();
+	CGContextRef context=CGBitmapContextCreate(NULL,1024,1024,8,1024*4,space,(CGBitmapInfo)kCGImageAlphaPremultipliedFirst);
+	
+	CALayer* container=CALayer.layer;
+	container.frame=rect;
+	CALayer* round=CALayer.layer;
+	round.frame=CGRectMake(100,100,824,824);
+	round.backgroundColor=backgroundColor;
+	round.cornerRadius=186;
+	if(@available(macOS 10.15,*))
+	{
+		round.cornerCurve=kCACornerCurveContinuous;
+	}
+	round.shadowOpacity=0.25;
+	round.shadowRadius=10;
+	round.shadowOffset=CGSizeMake(0,-10);
+	[container addSublayer:round];
+	[container renderInContext:context];
+	
+	CGContextSetLineJoin(context,kCGLineJoinRound);
+	CGContextSetLineWidth(context,40);
+	CGContextSetTextDrawingMode(context,kCGTextFillStroke);
+	CGContextSetFillColorWithColor(context,fillColor);
+	CGContextSetStrokeColorWithColor(context,strokeColor);
+	CGContextSelectFont(context,"Futura-Bold",650,kCGEncodingMacRoman);
+	CGContextShowTextAtPoint(context,290,410,"y",1);
+	
+	CGImageRef image=CGBitmapContextCreateImage(context);
+	
+	NSURL* url=[NSURL fileURLWithPath:@"icon.png"];
+	CGImageDestinationRef destination=CGImageDestinationCreateWithURL((CFURLRef)url,kUTTypePNG,1,NULL);
+	CGImageDestinationAddImage(destination,image,NULL);
+	CGImageDestinationFinalize(destination);
+	
+	CFRelease(destination);
+	CFRelease(image);
+	CFRelease(context);
+	CFRelease(space);
+	CFRelease(backgroundColor);
+	CFRelease(strokeColor);
+	CFRelease(fillColor);
 }
 
 @end

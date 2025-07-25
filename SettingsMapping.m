@@ -23,15 +23,16 @@
 
 -(BOOL)supported
 {
-	return [getXcodeSettings() respondsToSelector:self.getter]&&[getXcodeSettings() respondsToSelector:self.setter];
+	return [Xcode.settings respondsToSelector:self.getter]&&[Xcode.settings respondsToSelector:self.setter];
 }
 
--(BOOL)getValue
+-(BOOL)value
 {
 	if(self.supported)
 	{
-		return (BOOL)(long)[getXcodeSettings() performSelector:self.getter];
+		return (BOOL)(long)[Xcode.settings performSelector:self.getter];
 	}
+	
 	return false;
 }
 
@@ -39,18 +40,18 @@
 {
 	if(self.supported)
 	{
-		[getXcodeSettings() performSelector:self.setter withObject:(id)(long)value];
+		[Xcode.settings performSelector:self.setter withObject:(id)(long)value];
 	}
 }
 
 -(void)reset
 {
-	[self setValue:self.defaultValue];
+	self.value=self.defaultValue;
 }
 
 -(void)toggle
 {
-	[self setValue:!self.getValue];
+	self.value=!self.value;
 }
 
 -(void)dealloc

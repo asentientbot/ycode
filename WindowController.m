@@ -45,7 +45,10 @@
 
 +(void)syncTheme
 {
-	[WindowController.allInstances makeObjectsPerformSelector:@selector(syncTheme)];
+	dispatch_async(dispatch_get_main_queue(),^()
+	{
+		[WindowController.allInstances makeObjectsPerformSelector:@selector(syncTheme)];
+	});
 }
 
 -(instancetype)init
@@ -55,6 +58,11 @@
 	NSWindowStyleMask style=NSWindowStyleMaskTitled|NSWindowStyleMaskClosable|NSWindowStyleMaskResizable|NSWindowStyleMaskMiniaturizable;
 	self.window=[NSWindow.alloc initWithContentRect:CGRectZero styleMask:style backing:NSBackingStoreBuffered defer:false].autorelease;
 	self.window.delegate=Delegate.shared;
+	
+	NSVisualEffectView* blurView=NSVisualEffectView.alloc.init.autorelease;
+	blurView.material=AmyThemeBlurMaterial;
+	blurView.state=NSVisualEffectStateActive;
+	self.window.contentView=blurView;
 	
 	[self syncProjectModeWithPrevious:WindowController.lastInstance];
 	
@@ -76,7 +84,8 @@
 	
 	_xcodeViewController=newController.retain;
 	
-	self.window.contentView=_xcodeViewController.view;
+	self.window.contentView.subviews=@[_xcodeViewController.view];
+	_xcodeViewController.view.frame=self.window.contentView.frame;
 	
 	if(_xcodeViewController)
 	{
@@ -124,18 +133,15 @@
 
 -(void)syncTheme
 {
-	dispatch_async(dispatch_get_main_queue(),^()
+	NSAppearance* appearance=[NSAppearance appearanceNamed:Xcode.themeIsLight?NSAppearanceNameAqua:NSAppearanceNameVibrantDark];
+	if(@available(macOS 10.14,*))
 	{
-		NSAppearance* appearance=[NSAppearance appearanceNamed:Xcode.themeIsLight?NSAppearanceNameAqua:NSAppearanceNameVibrantDark];
-		if(@available(macOS 10.14,*))
-		{
-			NSApp.appearance=appearance;
-		}
-		else
-		{
-			self.window.appearance=appearance;
-		}
-	});
+		NSApp.appearance=appearance;
+	}
+	else
+	{
+		self.window.appearance=appearance;
+	}
 }
 
 -(void)dealloc

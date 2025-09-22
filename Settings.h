@@ -1,16 +1,27 @@
-#define AmyThemeBackgroundColor @"1 1 1"
-#define AmyThemeHighlightColor @"0.95 0.925 1"
-#define AmyThemeSelectionColor @"0.85 0.775 1"
-#define AmyThemeNormalColor @"0.4 0.3 0.7"
-#define AmyThemeMetaColor @"0.6 0.5 0.9"
-#define AmyThemeTypeColor @"0.5 0.2 0.8"
-#define AmyThemeKeywordColor @"0.7 0.2 0.8"
-#define AmyThemeStringColor @"0.85 0.35 1"
-#define AmyThemeNumberColor @"0.45 0.3 1"
+#define AmyThemeBlurMaterial NSVisualEffectMaterialMenu
+#define AmyThemeBackgroundColorOpaque @"1 1 1"
+#define AmyThemeBackgroundColorTranslucent @"1 1 1 0.8"
 
-#define AmyThemeRegularFont @"SFMono-Regular - 13.0"
-#define AmyThemeItalicFont @"SFMono-RegularItalic - 13.0"
-#define AmyThemeBoldFont @"SFMono-Bold - 13.0"
+#define AmyThemeBaseColor @"0.1 0 0.5"
+#define AmyThemeNormalColor [AmyThemeBaseColor stringByAppendingString:@" 0.7"]
+#define AmyThemeMetaColor [AmyThemeBaseColor stringByAppendingString:@" 0.5"]
+#define AmyThemeHighlightColor [AmyThemeBaseColor stringByAppendingString:@" 0.07"]
+#define AmyThemeSelectionColor [AmyThemeBaseColor stringByAppendingString:@" 0.2"]
+
+#define AmyThemeKeywordColor @"0.7 0 0.8 0.9"
+#define AmyThemeTypeColor @"0.5 0 0.8 0.9"
+
+#define AmyThemeStringColor @"0.7 0 0.9 0.7"
+#define AmyThemeNumberColor @"0.3 0 0.9 0.7"
+
+#define AmyThemeRegularFont @"SFMono-Regular - 12.5"
+#define AmyThemeItalicFont @"SFMono-RegularItalic - 12.5"
+#define AmyThemeBoldFont @"SFMono-Bold - 12.5"
+
+#define AmyThemeTerminalBlurAmount 1
+#define AmyThemeTerminalBackgroundColor @"1 1 1 0.9"
+#define AmyThemeTerminalFont @"SFMono-Regular"
+#define AmyThemeTerminalFontSize 11
 
 @interface Settings:NSObject
 @end

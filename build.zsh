@@ -18,10 +18,10 @@ rm -rf "$name.app" "$name.zip" icon.iconset
 mkdir -p "$name.app/Contents/MacOS"
 mkdir -p "$name.app/Contents/Resources"
 
-clang -fmodules -mmacosx-version-min=$minVersion -arch x86_64 -arch arm64 -D gitHash=$(git log -1 --format=%H) main.m -o "$name.app/Contents/MacOS/$name"
+clang -fmodules -mmacosx-version-min=$minVersion -arch x86_64 -arch arm64 -D YcodeAppName="$name" -D YcodeGitHash=$(git log -1 --format=%H) main.m -o "$name.app/Contents/MacOS/$name"
 
-clang -fmodules -D iconMode main.m -o icon
-./icon
+clang -fmodules -D YcodeBuildMode -D YcodeAppName="$name" main.m -o helper
+./helper
 
 mkdir icon.iconset
 for size in 16 32 128 256 512
@@ -32,7 +32,7 @@ done
 
 iconutil -c icns icon.iconset -o "$name.app/Contents/Resources/Icon.icns"
 
-rm -r icon icon.png icon.iconset
+rm -r helper icon.png icon.iconset
 
 echo "add CFBundleExecutable string $name
 add CFBundleIdentifier string $id

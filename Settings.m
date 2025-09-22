@@ -100,7 +100,6 @@
 	[NSUserDefaults.standardUserDefaults setBool:value forKey:@"showed project mode explanation"];
 }
 
-
 +(void)reset
 {
 	for(SettingsMapping* mapping in Settings.mappings)
@@ -108,8 +107,8 @@
 		mapping.reset;
 	}
 	
-	[Xcode saveThemeWithName:getAppName() backgroundColor:AmyThemeBackgroundColor highlightColor:AmyThemeHighlightColor selectionColor:AmyThemeSelectionColor defaultFont:AmyThemeRegularFont defaultColor:AmyThemeNormalColor commentFont:AmyThemeItalicFont commentColor:AmyThemeMetaColor preprocessorFont:AmyThemeRegularFont preprocessorColor:AmyThemeMetaColor classFont:AmyThemeBoldFont classColor:AmyThemeTypeColor functionFont:AmyThemeBoldFont functionColor:AmyThemeTypeColor keywordFont:AmyThemeBoldFont keywordColor:AmyThemeKeywordColor stringFont:AmyThemeBoldFont stringColor:AmyThemeStringColor numberFont:AmyThemeBoldFont numberColor:AmyThemeNumberColor];
-	Xcode.themeName=getAppName();
+	[Xcode saveThemeWithName:AppName backgroundColor:AmyThemeBackgroundColorTranslucent highlightColor:AmyThemeHighlightColor selectionColor:AmyThemeSelectionColor defaultFont:AmyThemeRegularFont defaultColor:AmyThemeNormalColor commentFont:AmyThemeItalicFont commentColor:AmyThemeMetaColor preprocessorFont:AmyThemeRegularFont preprocessorColor:AmyThemeMetaColor classFont:AmyThemeBoldFont classColor:AmyThemeTypeColor functionFont:AmyThemeBoldFont functionColor:AmyThemeTypeColor keywordFont:AmyThemeBoldFont keywordColor:AmyThemeKeywordColor stringFont:AmyThemeBoldFont stringColor:AmyThemeStringColor numberFont:AmyThemeBoldFont numberColor:AmyThemeNumberColor];
+	Xcode.themeName=AppName;
 	
 	Settings.showedProjectModeExplanation=false;
 }
@@ -124,7 +123,7 @@
 	}
 }
 
-+(CGColorRef)createColorWithString:(NSString*)string
++(NSColor*)colorWithString:(NSString*)string
 {
 	NSArray<NSString*>* bits=[string componentsSeparatedByString:@" "];
 	
@@ -133,14 +132,18 @@
 	CGFloat blue=bits[2].doubleValue;
 	CGFloat alpha=bits.count==4?bits[3].doubleValue:1;
 	
-	return CGColorCreateGenericRGB(red,green,blue,alpha);
+	CGColorRef cgColor=CGColorCreateGenericRGB(red,green,blue,alpha);
+	NSColor* appkitColor=[NSColor colorWithCGColor:cgColor];
+	CFRelease(cgColor);
+	
+	return appkitColor;
 }
 
 +(void)saveAppIcon
 {
-	CGColorRef backgroundColor=[Settings createColorWithString:AmyThemeBackgroundColor];
-	CGColorRef strokeColor=[Settings createColorWithString:AmyThemeNormalColor];
-	CGColorRef fillColor=[Settings createColorWithString:AmyThemeHighlightColor];
+	CGColorRef backgroundColor=[Settings colorWithString:AmyThemeBackgroundColorOpaque].CGColor;
+	CGColorRef strokeColor=[Settings colorWithString:AmyThemeNormalColor].CGColor;
+	CGColorRef fillColor=[Settings colorWithString:AmyThemeHighlightColor].CGColor;
 	
 	CGRect rect=CGRectMake(0,0,1024,1024);
 	
@@ -182,9 +185,31 @@
 	CFRelease(image);
 	CFRelease(context);
 	CFRelease(space);
-	CFRelease(backgroundColor);
-	CFRelease(strokeColor);
-	CFRelease(fillColor);
+}
+
++(NSData*)terminalColorDataWithString:(NSString*)string
+{
+	return [NSKeyedArchiver archivedDataWithRootObject:[Settings colorWithString:string] requiringSecureCoding:false error:nil];
+}
+
++(void)saveTerminalTheme
+{
+	NSDictionary* theme=@{
+		@"type":@"Window Settings",
+		@"name":AppName,
+		
+		@"Font":[NSKeyedArchiver archivedDataWithRootObject:[NSFont fontWithName:AmyThemeTerminalFont size:AmyThemeTerminalFontSize] requiringSecureCoding:false error:nil],
+		
+		@"BackgroundBlur":@AmyThemeTerminalBlurAmount,
+		
+		@"BackgroundColor":[Settings terminalColorDataWithString:AmyThemeTerminalBackgroundColor],
+		@"SelectionColor":[Settings terminalColorDataWithString:AmyThemeSelectionColor],
+		@"TextColor":[Settings terminalColorDataWithString:AmyThemeNormalColor],
+		@"TextBoldColor":[Settings terminalColorDataWithString:AmyThemeNormalColor],
+		@"CursorColor":[Settings terminalColorDataWithString:AmyThemeNormalColor]
+	};
+	
+	assert([theme writeToURL:[NSURL fileURLWithPath:[AppName stringByAppendingString:@".terminal"]] error:nil]);
 }
 
 @end

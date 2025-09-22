@@ -57,9 +57,9 @@
 	
 	NSMenu* bar=NSMenu.alloc.init.autorelease;
 	
-	NSMenu* nameMenu=[self addMenuWithTitle:getAppName() to:bar];
+	NSMenu* nameMenu=[self addMenuWithTitle:AppName to:bar];
 	
-	[self addItemWithTitle:[@"About " stringByAppendingString:getAppName()] action:@"handleAbout:" key:nil to:nameMenu];
+	[self addItemWithTitle:[@"About " stringByAppendingString:AppName] action:@"handleAbout:" key:nil to:nameMenu];
 	[self addSeparatorTo:nameMenu];
 	
 	for(NSString* name in Settings.mappingNames)
@@ -71,12 +71,12 @@
 	[self addItemWithTitle:@"Reset Settings (May Need Reload)" action:@"handleSettingsReset:" key:nil to:nameMenu];
 	[self addSeparatorTo:nameMenu];
 	
-	[self addItemWithTitle:[@"Hide " stringByAppendingString:getAppName()] action:@"hide:" key:@"h" to:nameMenu];
+	[self addItemWithTitle:[@"Hide " stringByAppendingString:AppName] action:@"hide:" key:@"h" to:nameMenu];
 	[self addItemWithTitle:@"Hide Others" action:@"hideOtherApplications:" key:@"h" mask:NSEventModifierFlagCommand|NSEventModifierFlagOption to:nameMenu];
 	[self addItemWithTitle:@"Show All" action:@"unhideAllApplications:" key:nil to:nameMenu];
 	[self addSeparatorTo:nameMenu];
 	
-	[self addItemWithTitle:[@"Quit " stringByAppendingString:getAppName()] action:@"terminate:" key:@"q" to:nameMenu];
+	[self addItemWithTitle:[@"Quit " stringByAppendingString:AppName] action:@"terminate:" key:@"q" to:nameMenu];
 	
 	NSMenu* fileMenu=[self addMenuWithTitle:@"File" to:bar];
 	
@@ -246,7 +246,7 @@
 
 -(void)handleAbout:(NSMenuItem*)sender
 {
-	alert([NSString stringWithFormat:@"Amy's meme text editor.\n\n%s",stringify(gitHash)]);
+	alert([NSString stringWithFormat:@"amy's meme text editor\n\n%@",GitHash]);
 }
 
 -(void)handleSettingsToggle:(NSMenuItem*)sender

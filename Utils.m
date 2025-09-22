@@ -3,15 +3,13 @@
 #define stringify2(name) #name
 #define stringify(name) stringify2(name)
 
-NSString* getAppName()
-{
-	return NSProcessInfo.processInfo.arguments[0].lastPathComponent;
-}
+NSString* AppName=@(stringify(YcodeAppName));
+NSString* GitHash=@(stringify(YcodeGitHash));
 
 void alert(NSString* message)
 {
 	NSAlert* alert=NSAlert.alloc.init.autorelease;
-	alert.messageText=getAppName();
+	alert.messageText=AppName;
 	alert.informativeText=message;
 	alert.runModal;
 }

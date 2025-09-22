@@ -50,7 +50,7 @@
 
 -(void)loadWithURL:(NSURL*)url
 {
-	NSString* tempName=[NSString stringWithFormat:@"%@.%ld.txt",getAppName(),(long)(NSDate.date.timeIntervalSince1970*NSEC_PER_SEC)];
+	NSString* tempName=[NSString stringWithFormat:@"%@.%ld.txt",AppName,(long)(NSDate.date.timeIntervalSince1970*NSEC_PER_SEC)];
 	NSURL* tempURL=[NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:tempName]];
 	
 	NSString* type;

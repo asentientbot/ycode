@@ -28,11 +28,12 @@ int main(int argc,char** argv)
 {
 	@autoreleasepool
 	{
-#ifdef iconMode
-		Settings.saveAppIcon;
-#else
 		[Xcode setupWithArgv:argv];
 		
+#ifdef YcodeBuildMode
+		Settings.saveAppIcon;
+		Settings.saveTerminalTheme;
+#else
 		NSApplication.sharedApplication.delegate=Delegate.alloc.init;
 		NSApp.run;
 #endif

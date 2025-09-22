@@ -84,11 +84,12 @@
 	
 	_xcodeViewController=newController.retain;
 	
-	self.window.contentView.subviews=@[_xcodeViewController.view];
-	_xcodeViewController.view.frame=self.window.contentView.frame;
-	
 	if(_xcodeViewController)
 	{
+		self.window.contentView.subviews=@[_xcodeViewController.view];
+		_xcodeViewController.view.frame=self.window.contentView.frame;
+		_xcodeViewController.view.autoresizingMask=NSViewWidthSizable|NSViewHeightSizable;
+		
 		[Xcode focusViewController:_xcodeViewController withSelection:oldSelection];
 	}
 }

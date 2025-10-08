@@ -82,7 +82,7 @@
 	
 	[self addItemWithTitle:@"New" action:@"newDocument:" key:@"n" to:fileMenu];
 	[self addItemWithTitle:@"Open" action:@"openDocument:" key:@"o" to:fileMenu];
-	[self addItemWithTitle:@"" action:@"handleReopen:" key:@"T" to:fileMenu].tag=TagReopen;
+	[self addItemWithTitle:@"Reopen Last Closed" action:@"handleReopen:" key:@"T" to:fileMenu];
 	[self addSeparatorTo:fileMenu];
 	
 	[self addItemWithTitle:@"Close" action:@"performClose:" key:@"w" to:fileMenu];
@@ -208,7 +208,7 @@
 				Document* document=NSApp.keyWindow.windowController.document;
 				if(document)
 				{
-					menuItem.title=[NSString stringWithFormat:@"Claim File Type \"%@\"",document.xcodeDocument.fileType];
+					menuItem.title=[NSString stringWithFormat:@"Claim File Type \"%@\"",document.actualFileType];
 					NSString* existing=((NSString*)LSCopyDefaultRoleHandlerForContentType((CFStringRef)document.xcodeDocument.fileType,kLSRolesAll)).autorelease;
 					if([existing isEqual:NSBundle.mainBundle.bundleIdentifier])
 					{
@@ -218,20 +218,6 @@
 				else
 				{
 					menuItem.title=@"Claim File Type";
-					enabled=false;
-				}
-				break;
-			}
-			case TagReopen:
-			{
-				NSURL* url=self.urlToReopen;
-				if(url)
-				{
-					menuItem.title=[NSString stringWithFormat:@"Reopen \"%@\"",url.lastPathComponent];
-				}
-				else
-				{
-					menuItem.title=@"Reopen Last Closed";
 					enabled=false;
 				}
 				break;
@@ -259,30 +245,37 @@
 	Settings.reset;
 }
 
--(NSURL*)urlToReopen
-{
-	for(NSURL* url in NSDocumentController.sharedDocumentController.recentDocumentURLs)
-	{
-		if(![NSDocumentController.sharedDocumentController documentForURL:url])
-		{
-			return url;
-		}
-	}
-	
-	return nil;
-}
-
 -(void)handleReopen:(NSMenuItem*)sender
 {
-	[NSDocumentController.sharedDocumentController openDocumentWithContentsOfURL:self.urlToReopen display:true completionHandler:^(NSDocument* document,BOOL wasAlreadyOpen,NSError* error)
+	LSSharedFileListRef opaqueList=LSSharedFileListCreate(NULL,CFSTR("com.apple.LSSharedFileList.ApplicationRecentDocuments"),NULL);
+	NSArray* actualList=((NSArray*)LSSharedFileListCopySnapshot(opaqueList,NULL)).autorelease;
+	CFRelease(opaqueList);
+	
+	for(id item in actualList)
 	{
-	}];
+		NSURL* url=((NSURL*)LSSharedFileListItemCopyResolvedURL((LSSharedFileListItemRef)item,0,NULL)).autorelease;
+		if(!url)
+		{
+			continue;
+		}
+		
+		if([NSDocumentController.sharedDocumentController documentForURL:url])
+		{
+			continue;
+		}
+		
+		[NSDocumentController.sharedDocumentController openDocumentWithContentsOfURL:url display:true completionHandler:^(NSDocument* document,BOOL wasAlreadyOpen,NSError* error)
+		{
+		}];
+		
+		break;
+	}
 }
 
 -(void)handleClaimFileAssociation:(NSMenuItem*)sender
 {
 	Document* document=NSApp.keyWindow.windowController.document;
-	LSSetDefaultRoleHandlerForContentType((CFStringRef)document.xcodeDocument.fileType,kLSRolesAll,(CFStringRef)NSBundle.mainBundle.bundleIdentifier);
+	LSSetDefaultRoleHandlerForContentType((CFStringRef)document.actualFileType,kLSRolesAll,(CFStringRef)NSBundle.mainBundle.bundleIdentifier);
 }
 
 -(void)handleSetTheme:(NSMenuItem*)sender

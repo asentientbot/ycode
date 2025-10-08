@@ -5,7 +5,6 @@ enum
 	TagProjectMode,
 	TagTab,
 	TagFileAssociation,
-	TagReopen
 };
 
 @interface Delegate:NSObject<NSApplicationDelegate,NSUserInterfaceValidations,NSWindowDelegate>

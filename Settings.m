@@ -123,6 +123,12 @@
 	}
 }
 
++(NSString*)xcodeTypeWithType:(NSString*)type
+{
+	NSString* override=TypeOverrideMapping[type];
+	return override?override:type;
+}
+
 +(NSColor*)colorWithString:(NSString*)string
 {
 	NSArray<NSString*>* bits=[string componentsSeparatedByString:@" "];

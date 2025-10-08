@@ -34,11 +34,6 @@
 			previous=instance;
 		}
 		
-		if(Delegate.shared.projectMode)
-		{
-			[WindowController.firstInstance.window mergeAllWindows:nil];
-		}
-		
 		[previousKeyWindow makeKeyAndOrderFront:nil];
 	});
 }
@@ -104,6 +99,7 @@
 	if(Delegate.shared.projectMode)
 	{
 		self.window.tabbingMode=NSWindowTabbingModePreferred;
+		[self.window mergeAllWindows:nil];
 	}
 	else
 	{

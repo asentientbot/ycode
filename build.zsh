@@ -29,25 +29,24 @@ do
 	sips -Z $size icon.png --out icon.iconset/icon_${size}x${size}.png
 	sips -Z $(($size*2)) icon.png --out icon.iconset/icon_${size}x${size}@2x.png
 done
-
 iconutil -c icns icon.iconset -o "$name.app/Contents/Resources/Icon.icns"
 
 rm -r helper icon.png icon.iconset
 
-echo "add CFBundleExecutable string $name
+while read line
+do
+	/usr/libexec/PlistBuddy "$name.app/Contents/Info.plist" -c "$line"
+done <<< "add CFBundleExecutable string $name
 add CFBundleIdentifier string $id
 add CFBundleIconFile string Icon.icns
-add NSHighResolutionCapable bool true
 add CFBundleDocumentTypes array
 add CFBundleDocumentTypes: dict
 add CFBundleDocumentTypes:0:NSDocumentClass string $class
 add CFBundleDocumentTypes:0:CFBundleTypeRole string Editor
 add CFBundleDocumentTypes:0:LSItemContentTypes array
 add CFBundleDocumentTypes:0:LSItemContentTypes: string $type
-add NSSupportsAutomaticTermination bool true" | while read command
-do
-	/usr/libexec/PlistBuddy "$name.app/Contents/Info.plist" -c "$command"
-done
+add NSHighResolutionCapable bool true
+add NSSupportsAutomaticTermination bool true"
 
 codesign -fs - "$name.app"
 

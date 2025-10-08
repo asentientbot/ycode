@@ -167,7 +167,7 @@
 	[container renderInContext:context];
 	
 	CGContextSetLineJoin(context,kCGLineJoinRound);
-	CGContextSetLineWidth(context,40);
+	CGContextSetLineWidth(context,30);
 	CGContextSetTextDrawingMode(context,kCGTextFillStroke);
 	CGContextSetFillColorWithColor(context,fillColor);
 	CGContextSetStrokeColorWithColor(context,strokeColor);

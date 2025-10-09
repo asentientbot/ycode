@@ -25,6 +25,8 @@
 {
 	dispatch_async(dispatch_get_main_queue(),^()
 	{
+		Delegate.shared.ignoreFrameChanges=true;
+		
 		NSWindow* previousKeyWindow=NSApp.keyWindow;
 		
 		WindowController* previous=nil;
@@ -34,7 +36,21 @@
 			previous=instance;
 		}
 		
+		if(Delegate.shared.projectMode)
+		{
+			[previousKeyWindow mergeAllWindows:nil];
+		}
+		
 		[previousKeyWindow makeKeyAndOrderFront:nil];
+		
+		if(Delegate.shared.projectMode&&!Settings.showedProjectModeExplanation)
+		{
+			Settings.showedProjectModeExplanation=true;
+			
+			alert(@"Project Mode uses tabs and remembers the window dimensions across launches (like TextMate). Switch back to the default mode for little windows (like TextEdit).");
+		}
+		
+		Delegate.shared.ignoreFrameChanges=false;
 	});
 }
 
@@ -96,12 +112,7 @@
 
 -(void)syncProjectModeWithPrevious:(WindowController*)previous
 {
-	if(Delegate.shared.projectMode)
-	{
-		self.window.tabbingMode=NSWindowTabbingModePreferred;
-		[self.window mergeAllWindows:nil];
-	}
-	else
+	if(!Delegate.shared.projectMode)
 	{
 		self.window.tabbingMode=NSWindowTabbingModeDisallowed;
 		[self.window moveTabToNewWindow:nil];
@@ -120,6 +131,7 @@
 	
 	if(Delegate.shared.projectMode)
 	{
+		self.window.tabbingMode=NSWindowTabbingModePreferred;
 		[self.window setFrame:Settings.projectRect display:false];
 	}
 	else

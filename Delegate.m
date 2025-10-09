@@ -7,21 +7,9 @@
 
 -(void)setProjectMode:(BOOL)value
 {
-	if(_projectMode==value)
-	{
-		return;
-	}
-	
 	_projectMode=value;
 	
 	WindowController.syncProjectMode;
-	
-	if(_projectMode&&!Settings.showedProjectModeExplanation)
-	{
-		Settings.showedProjectModeExplanation=true;
-		
-		alert(@"Project Mode uses tabs and remembers the window dimensions across launches (like TextMate). Switch back to the default mode for little windows (like TextEdit).");
-	}
 }
 
 -(NSMenu*)addMenuWithTitle:(NSString*)title to:(NSMenu*)bar
@@ -302,7 +290,7 @@
 
 -(void)handleFrameChange:(CGRect)frame
 {
-	if(!self.projectMode)
+	if(self.ignoreFrameChanges||!self.projectMode)
 	{
 		return;
 	}

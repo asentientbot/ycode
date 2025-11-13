@@ -70,10 +70,9 @@
 	self.window=[NSWindow.alloc initWithContentRect:CGRectZero styleMask:style backing:NSBackingStoreBuffered defer:false].autorelease;
 	self.window.delegate=Delegate.shared;
 	
-	NSVisualEffectView* blurView=NSVisualEffectView.alloc.init.autorelease;
-	blurView.material=AmyThemeBlurMaterial;
-	blurView.state=NSVisualEffectStateActive;
-	self.window.contentView=blurView;
+	// TODO: a tahoe bug or i was relying on undefined behavior? idk
+	
+	self.window.backgroundColor=[Settings colorWithString:AmyThemeBackgroundColor];
 	
 	[self syncProjectModeWithPrevious:WindowController.lastInstance];
 	
@@ -97,9 +96,7 @@
 	
 	if(_xcodeViewController)
 	{
-		self.window.contentView.subviews=@[_xcodeViewController.view];
-		_xcodeViewController.view.frame=self.window.contentView.frame;
-		_xcodeViewController.view.autoresizingMask=NSViewWidthSizable|NSViewHeightSizable;
+		self.window.contentView=_xcodeViewController.view;
 		
 		[Xcode focusViewController:_xcodeViewController withSelection:oldSelection];
 	}

@@ -100,6 +100,11 @@
 	[NSUserDefaults.standardUserDefaults setBool:value forKey:@"showed project mode explanation"];
 }
 
++(void)saveDefaultTheme
+{
+	[Xcode saveThemeWithName:AppName backgroundColor:AmyThemeBackgroundColor highlightColor:AmyThemeHighlightColor selectionColor:AmyThemeSelectionColor defaultFont:AmyThemeRegularFont defaultColor:AmyThemeNormalColor commentFont:AmyThemeItalicFont commentColor:AmyThemeMetaColor preprocessorFont:AmyThemeRegularFont preprocessorColor:AmyThemeMetaColor classFont:AmyThemeBoldFont classColor:AmyThemeTypeColor functionFont:AmyThemeBoldFont functionColor:AmyThemeTypeColor keywordFont:AmyThemeBoldFont keywordColor:AmyThemeKeywordColor stringFont:AmyThemeBoldFont stringColor:AmyThemeStringColor numberFont:AmyThemeBoldFont numberColor:AmyThemeNumberColor];
+}
+
 +(void)reset
 {
 	for(SettingsMapping* mapping in Settings.mappings)
@@ -107,13 +112,13 @@
 		mapping.reset;
 	}
 	
-	[Xcode saveThemeWithName:AppName backgroundColor:AmyThemeBackgroundColorTranslucent highlightColor:AmyThemeHighlightColor selectionColor:AmyThemeSelectionColor defaultFont:AmyThemeRegularFont defaultColor:AmyThemeNormalColor commentFont:AmyThemeItalicFont commentColor:AmyThemeMetaColor preprocessorFont:AmyThemeRegularFont preprocessorColor:AmyThemeMetaColor classFont:AmyThemeBoldFont classColor:AmyThemeTypeColor functionFont:AmyThemeBoldFont functionColor:AmyThemeTypeColor keywordFont:AmyThemeBoldFont keywordColor:AmyThemeKeywordColor stringFont:AmyThemeBoldFont stringColor:AmyThemeStringColor numberFont:AmyThemeBoldFont numberColor:AmyThemeNumberColor];
+	Settings.saveDefaultTheme;
 	Xcode.themeName=AppName;
 	
 	Settings.showedProjectModeExplanation=false;
 }
 
-+(void)checkFirstRun
++(void)start
 {
 	if(![NSUserDefaults.standardUserDefaults boolForKey:@"launched"])
 	{
@@ -121,6 +126,8 @@
 		
 		Settings.reset;
 	}
+	
+	Settings.saveDefaultTheme;
 }
 
 +(NSString*)xcodeTypeWithType:(NSString*)type
@@ -147,7 +154,7 @@
 
 +(void)saveAppIcon
 {
-	CGColorRef backgroundColor=[Settings colorWithString:AmyThemeBackgroundColorOpaque].CGColor;
+	CGColorRef backgroundColor=[Settings colorWithString:AmyThemeBackgroundColor].CGColor;
 	CGColorRef strokeColor=[Settings colorWithString:AmyThemeNormalColor].CGColor;
 	CGColorRef fillColor=[Settings colorWithString:AmyThemeHighlightColor].CGColor;
 	
@@ -206,9 +213,7 @@
 		
 		@"Font":[NSKeyedArchiver archivedDataWithRootObject:[NSFont fontWithName:AmyThemeTerminalFont size:AmyThemeTerminalFontSize] requiringSecureCoding:false error:nil],
 		
-		@"BackgroundBlur":@AmyThemeTerminalBlurAmount,
-		
-		@"BackgroundColor":[Settings terminalColorDataWithString:AmyThemeTerminalBackgroundColor],
+		@"BackgroundColor":[Settings terminalColorDataWithString:AmyThemeBackgroundColor],
 		@"SelectionColor":[Settings terminalColorDataWithString:AmyThemeSelectionColor],
 		@"TextColor":[Settings terminalColorDataWithString:AmyThemeNormalColor],
 		@"TextBoldColor":[Settings terminalColorDataWithString:AmyThemeNormalColor],

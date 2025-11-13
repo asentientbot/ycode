@@ -55,7 +55,6 @@ then
 	set +e
 	
 	defaults delete $id
-	rm ~/Library/Developer/Xcode/UserData/FontAndColorThemes/"$name".xccolortheme
 	
 	"$name.app/Contents/MacOS/$name"
 else

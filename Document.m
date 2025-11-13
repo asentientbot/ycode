@@ -59,8 +59,20 @@
 {
 	self.fileURL=url;
 	
+	NSString* tempFolder;
+	NSString* alternateFolder=[NSString stringWithFormat:@"~/Documents/%@ Storage",AppName].stringByExpandingTildeInPath;
+	BOOL alternateFolderIsFolder=false;
+	if([NSFileManager.defaultManager fileExistsAtPath:alternateFolder isDirectory:&alternateFolderIsFolder]&&alternateFolderIsFolder)
+	{
+		tempFolder=alternateFolder;
+	}
+	else
+	{
+		tempFolder=NSTemporaryDirectory();
+	}
+	
 	NSString* tempName=[NSString stringWithFormat:@"%@.%ld.txt",AppName,(long)(NSDate.date.timeIntervalSince1970*NSEC_PER_SEC)];
-	NSURL* tempURL=[NSURL fileURLWithPath:[NSTemporaryDirectory() stringByAppendingPathComponent:tempName]];
+	NSURL* tempURL=[NSURL fileURLWithPath:[tempFolder stringByAppendingPathComponent:tempName]];
 	
 	if(url)
 	{

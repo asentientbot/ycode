@@ -41,7 +41,7 @@
 
 -(void)applicationWillFinishLaunching:(NSNotification*)note
 {
-	Settings.checkFirstRun;
+	Settings.start;
 	
 	NSMenu* bar=NSMenu.alloc.init.autorelease;
 	

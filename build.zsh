@@ -58,5 +58,6 @@ then
 	
 	"$name.app/Contents/MacOS/$name"
 else
-	zip -r "$name.zip" "$name.app"
+	zip -r "$name.zip" "$name.app" "$name.terminal"
+	rm -rf "$name.app" "$name.terminal"
 fi

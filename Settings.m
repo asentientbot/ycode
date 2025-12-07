@@ -136,16 +136,30 @@
 	return override?override:type;
 }
 
++(NSString*)lightColorStringWithString:(NSString*)string alpha:(double)amount
+{
+	NSArray<NSString*>* bits=[string componentsSeparatedByString:@" "];
+	assert(bits.count==3);
+	
+	NSMutableArray<NSNumber*>* newBits=NSMutableArray.alloc.init.autorelease;
+	for(NSString* bit in bits)
+	{
+		[newBits addObject:@(bit.doubleValue*amount+1-amount)];
+	}
+	
+	return [newBits componentsJoinedByString:@" "];
+}
+
 +(NSColor*)colorWithString:(NSString*)string
 {
 	NSArray<NSString*>* bits=[string componentsSeparatedByString:@" "];
+	assert(bits.count==3);
 	
 	CGFloat red=bits[0].doubleValue;
 	CGFloat green=bits[1].doubleValue;
 	CGFloat blue=bits[2].doubleValue;
-	CGFloat alpha=bits.count==4?bits[3].doubleValue:1;
 	
-	CGColorRef cgColor=CGColorCreateGenericRGB(red,green,blue,alpha);
+	CGColorRef cgColor=CGColorCreateGenericRGB(red,green,blue,1);
 	NSColor* appkitColor=[NSColor colorWithCGColor:cgColor];
 	CFRelease(cgColor);
 	

@@ -1,10 +1,10 @@
 #define AmyThemeBackgroundColor @"1 1 1"
 
 #define AmyThemeBaseColor @"0.1 0 0.4"
-#define AmyThemeNormalColor [AmyThemeBaseColor stringByAppendingString:@" 0.7"]
-#define AmyThemeMetaColor [AmyThemeBaseColor stringByAppendingString:@" 0.5"]
-#define AmyThemeHighlightColor [AmyThemeBaseColor stringByAppendingString:@" 0.05"]
-#define AmyThemeSelectionColor [AmyThemeBaseColor stringByAppendingString:@" 0.15"]
+#define AmyThemeNormalColor [Settings lightColorStringWithString:AmyThemeBaseColor alpha:0.7]
+#define AmyThemeMetaColor [Settings lightColorStringWithString:AmyThemeBaseColor alpha:0.5]
+#define AmyThemeHighlightColor [Settings lightColorStringWithString:AmyThemeBaseColor alpha:0.05]
+#define AmyThemeSelectionColor [Settings lightColorStringWithString:AmyThemeBaseColor alpha:0.15]
 
 #define AmyThemeKeywordColor @"0.7 0 0.7"
 #define AmyThemeTypeColor @"0.5 0 0.8"

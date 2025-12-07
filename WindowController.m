@@ -123,7 +123,7 @@
 	
 	if(CGRectEqualToRect(Settings.projectRect,CGRectZero))
 	{
-		Settings.projectRect=cascadedRect;
+		Settings.projectRect=CGRectMake(previousRect.origin.x+toolbarHeight,previousRect.origin.y+previousRect.size.height-DefaultProjectHeight-toolbarHeight,DefaultProjectWidth,DefaultProjectHeight);
 	}
 	
 	if(Delegate.shared.projectMode)

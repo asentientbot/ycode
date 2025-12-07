@@ -1,3 +1,8 @@
+#define ScratchWidth 600
+#define ScratchHeight 500
+#define DefaultProjectWidth 700
+#define DefaultProjectHeight 600
+
 #define AmyThemeBackgroundColor @"1 1 1"
 
 #define AmyThemeBaseColor @"0.1 0 0.4"

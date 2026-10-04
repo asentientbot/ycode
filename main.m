@@ -1,6 +1,7 @@
 @import AppKit;
 @import Darwin;
 @import ObjectiveC;
+@import MachO;
 
 #pragma clang diagnostic ignored "-Wunused-getter-return-value"
 #pragma clang diagnostic ignored "-Wobjc-missing-super-calls"

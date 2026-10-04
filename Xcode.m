@@ -142,6 +142,25 @@ NSMenu* hackContextMenu()
 	
 	[NSUserDefaults.standardUserDefaults setObject:theme.name forKey:XcodeLightThemeKey];
 	[NSUserDefaults.standardUserDefaults setObject:theme.name forKey:XcodeDarkThemeKey];
+	
+	if(@available(macOS 27,*))
+	{
+		long themePicker[100]={};
+		long dummyTarget[100]={};
+		long dummyContext[100]={};
+		Xcode27ThemePicker_init(themePicker,dummyTarget,dummyContext,false,NULL);
+		
+		NSString* fileName=[NSString stringWithFormat:@"%@ - auto converted",AppName];
+		for(NSString* existingName in [NSFileManager.defaultManager contentsOfDirectoryAtPath:Xcode.userThemesPath error:nil])
+		{
+			if([existingName hasPrefix:fileName])
+			{
+				[NSFileManager.defaultManager removeItemAtPath:[Xcode.userThemesPath stringByAppendingPathComponent:existingName] error:nil];
+			}
+		}
+		
+		Xcode27ThemePicker_apply(themePicker,swiftBridgeString(fileName),Xcode.theme,0x101);
+	}
 }
 
 +(void)setThemeName:(NSString*)name
@@ -305,6 +324,54 @@ NSMenu* hackContextMenu()
 	return [Xcode linkSymbol:[NSString stringWithFormat:@"OBJC_CLASS_$_%@",name]];
 }
 
++(void*)linkPrivateSymbol:(NSString*)symbolName withLibrarySuffix:(NSString*)librarySuffix
+{
+	for(int libraryIndex=0;libraryIndex<_dyld_image_count();libraryIndex++)
+	{
+		if([@(_dyld_get_image_name(libraryIndex)) hasSuffix:librarySuffix])
+		{
+			struct mach_header_64* header=(struct mach_header_64*)_dyld_get_image_header(libraryIndex);
+			struct load_command* command=(struct load_command*)(header+1);
+			unsigned long linkeditDelta=0;
+			
+			for(int commandIndex=0;commandIndex<header->ncmds;commandIndex++)
+			{
+				if(command->cmd==LC_SEGMENT_64)
+				{
+					struct segment_command_64* segment=(struct segment_command_64*)command;
+					
+					if([@(segment->segname) isEqual:@"__LINKEDIT"])
+					{
+						linkeditDelta=segment->vmaddr-segment->fileoff;
+					}
+				}
+				
+				if(command->cmd==LC_SYMTAB)
+				{
+					assert(linkeditDelta);
+					
+					struct symtab_command* symtab=(struct symtab_command*)command;
+					
+					struct nlist_64* symbols=(struct nlist_64*)((char*)header+linkeditDelta+symtab->symoff);
+					char* strings=(char*)header+linkeditDelta+symtab->stroff;
+					
+					for(int symbolIndex=0;symbolIndex<symtab->nsyms;symbolIndex++)
+					{
+						if([@(strings+symbols[symbolIndex].n_un.n_strx) isEqual:symbolName])
+						{
+							return (void*)symbols[symbolIndex].n_value+_dyld_get_image_vmaddr_slide(libraryIndex);
+						}
+					}
+				}
+				
+				command=(struct load_command*)((char*)command+command->cmdsize);
+			}
+		}
+	}
+	
+	alertAbort([NSString stringWithFormat:@"symtab lookup failed: %s",dlerror()]);
+}
+
 +(IMP)swizzleWithClass:(NSString*)className selector:(NSString*)selName isInstance:(BOOL)isInstance implementation:(IMP)newImp
 {
 	Class class=NSClassFromString(className);
@@ -348,6 +415,14 @@ NSMenu* hackContextMenu()
 	SoftSettings=[Xcode linkClass:@"DVTTextPreferences"];
 	SoftSettings2=[Xcode linkClass:@"IDEFileTextSettings"];
 	SoftDocumentLocation=[Xcode linkClass:@"DVTTextDocumentLocation"];
+	
+	if(@available(macOS 27,*))
+	{
+		swiftBridgeString=[Xcode linkSymbol:@"$sSS10FoundationE36_unconditionallyBridgeFromObjectiveCySSSo8NSStringCSgFZ"];
+		
+		Xcode27ThemePicker_init=[Xcode linkPrivateSymbol:@"_$s19DVTUserInterfaceKit15ThemePickerGridV7context6target9isCompact8onSelectAcA012DVTWorkspaceD7ContextV_AC6TargetOSbyycSgtcfC" withLibrarySuffix:@"DVTUserInterfaceKit"];
+		Xcode27ThemePicker_apply=[Xcode linkPrivateSymbol:@"_$s19DVTUserInterfaceKit15ThemePickerGridV012applyClassicD6Import33_945D6749F94A05C9BD003E49C40D3B9DLL4name5theme9selectionySS_So015DVTFontAndColorD0CAA0hdI12OptionsSheetV9SelectionVtF" withLibrarySuffix:@"DVTUserInterfaceKit"];
+	}
 	
 	// TODO: stupid
 	

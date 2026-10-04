@@ -89,5 +89,15 @@ Class SoftTheme2;
 
 NSMenu* (^contextMenuHook)()=NULL;
 
+struct SwiftStringHack
+{
+	long values[2];
+};
+
+struct SwiftStringHack (*swiftBridgeString)(NSString*);
+
+void __attribute__((swiftcall)) (*Xcode27ThemePicker_init)(__attribute__((swift_indirect_result)) void*,void*,void*,BOOL,void*);
+void __attribute__((swiftcall)) (*Xcode27ThemePicker_apply)(__attribute__((swift_context)) void*,struct SwiftStringHack,XcodeTheme2*,int);
+
 @interface Xcode:NSObject
 @end

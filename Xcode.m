@@ -1,29 +1,5 @@
-@interface FakeDocumentController:NSObject
-@end
-
-@implementation FakeDocumentController
-
--(id)workspaceDocuments
-{
-	return nil;
-}
-
-@end
-
-BOOL mightNeedFakeDocumentController=true;
-
 NSObject* hackDocumentController()
 {
-	if(@available(macOS 27,*))
-	{
-		if(mightNeedFakeDocumentController&&[NSThread.callStackSymbols[1] containsString:@"$s6IDEKit35IDEWorkspaceThemeOverrideDataSourceC15installIfNeeded33_EC2B2934FA8B952E633945C4050A3FA5LLyyFZ"])
-		{
-			return FakeDocumentController.alloc.init.autorelease;
-		}
-		
-		mightNeedFakeDocumentController=false;
-	}
-
 	return nil;
 }
 

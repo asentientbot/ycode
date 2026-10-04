@@ -130,10 +130,21 @@
 	Settings.saveDefaultTheme;
 }
 
-+(NSString*)xcodeTypeWithType:(NSString*)type
++(NSString*)typeOverrideWithExtension:(NSString*)extension
 {
-	NSString* override=TypeOverrideMapping[type];
-	return override?override:type;
+	return @{
+		@"as":@"com.netscape.javascript-source",
+		
+		@"plist":@"public.xml",
+		@"terminal":@"public.xml",
+		
+		@"jsonc":@"public.json",
+		
+		// TODO: sandbox files should be Scheme apparently
+		// but CLIPS is the only Lisp-related language that Xcode supports?
+		
+		@"sb":@"com.apple.clips-source",
+	}[extension];
 }
 
 +(NSString*)lightColorStringWithString:(NSString*)string alpha:(double)amount

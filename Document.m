@@ -89,7 +89,13 @@
 		}
 	}
 	
-	self.xcodeDocument=[Xcode documentWithURL:tempURL type:[Settings xcodeTypeWithType:self.actualFileType]];
+	NSString* xcodeType=[Settings typeOverrideWithExtension:url.pathExtension];
+	if(!xcodeType)
+	{
+		xcodeType=self.actualFileType;
+	}
+	
+	self.xcodeDocument=[Xcode documentWithURL:tempURL type:xcodeType];
 	
 	self.syncWindowController;
 	

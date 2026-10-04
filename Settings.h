@@ -24,11 +24,5 @@
 #define AmyThemeTerminalFont @"SFMono-Regular"
 #define AmyThemeTerminalFontSize 11
 
-#define TypeOverrideMapping @{\
-	@"com.apple.property-list":@"public.xml",\
-	@"com.apple.applesingle-archive":@"com.netscape.javascript-source",\
-	@"com.apple.terminal.settings":@"public.xml"\
-}
-
 @interface Settings:NSObject
 @end
